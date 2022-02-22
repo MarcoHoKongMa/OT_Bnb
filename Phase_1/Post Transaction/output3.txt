@@ -1,0 +1,7 @@
+Insert # of bedrooms: 
+Invalid: No input given
+Insert # of bedrooms: 
+Invalid Syntax
+Insert # of bedrooms: 
+Invalid: Need to be within 1-9 bedrooms
+Insert # of bedrooms: 

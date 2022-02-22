@@ -1,0 +1,9 @@
+Insert Rental Price: 
+Invalid: No input given
+Insert Rental Price: 
+Invalid Syntax
+Insert Rental Price: 
+Invalid: Needs to be under $1000.00
+Insert Rental Price: 
+Invalid: Needs to be above or equal to $0.00
+Insert Rental Price: 

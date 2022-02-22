@@ -1,0 +1,5 @@
+Insert City Name: 
+Invalid: No input given
+Insert City Name: 
+Invalid: Needs to be within 1-25 characters
+Insert City Name: 

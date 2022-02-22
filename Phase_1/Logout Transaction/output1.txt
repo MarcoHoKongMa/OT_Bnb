@@ -1,0 +1,2 @@
+Transaction failed, must first login
+Transaction Successful, XX_UUUUUUUUUU_TT_IIIIIIII_CCCCCCCCCCCCCCC_B_PPPPPP_NN
