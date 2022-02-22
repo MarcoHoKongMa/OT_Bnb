@@ -1,0 +1,2 @@
+newuser2022 is the current user for this session. Cannot delete current user of a session
+
