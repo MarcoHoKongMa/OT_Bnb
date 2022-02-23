@@ -1,0 +1,13 @@
+Output:
+	Invalid: Username is taken, please enter a new user name
+
+Output:
+	Invalid: no input detected.
+
+
+Output:
+	Invalid: Enter a username from 1-15 characters.
+
+Output:
+	Valid: Username accepted.	
+

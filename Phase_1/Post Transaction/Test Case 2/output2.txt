@@ -1,0 +1,14 @@
+Output: 
+	Invalid: No input given
+
+Output: 
+	Invalid Syntax
+
+Output: 
+	Invalid: Needs to be under $1000.00
+
+Output: 
+	Invalid: Needs to be above or equal to $0.00
+
+Output: 
+	Valid: input accepted

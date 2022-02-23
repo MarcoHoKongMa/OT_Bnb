@@ -1,0 +1,11 @@
+Input rental ID and # of nights:
+
+
+Input rental ID and # of nights:
+	001, 4
+
+Input rental ID and # of nights:
+	001, 15
+
+Input rental ID and # of nights:
+	003, 1

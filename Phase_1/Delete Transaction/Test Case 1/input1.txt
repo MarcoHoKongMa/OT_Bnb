@@ -1,0 +1,11 @@
+Input username:
+	newuser2022
+
+Input username:
+	
+
+Input username:
+	exampleUser1
+
+Input username:
+	exampleUser2

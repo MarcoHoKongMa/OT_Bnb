@@ -1,7 +1,0 @@
-Insert # of bedrooms: 
-Invalid: No input given
-Insert # of bedrooms: 
-Invalid Syntax
-Insert # of bedrooms: 
-Invalid: Only 1-9 bedrooms are avaliable
-Insert # of bedrooms: 

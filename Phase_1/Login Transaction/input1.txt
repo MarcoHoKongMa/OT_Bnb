@@ -1,2 +1,0 @@
-exampleUser1
-exampleUser2

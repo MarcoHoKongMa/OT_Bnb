@@ -1,0 +1,2 @@
+Output:
+	jack the man has been deleted

@@ -1,0 +1,8 @@
+Output:
+	Invalid: no input detected.
+
+Output:
+	Your rental request is being processed.
+
+Output:
+	Your rental request has been cancelled.

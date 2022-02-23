@@ -1,2 +1,0 @@
-Login successful, hello exampleUser1
-Login failed, exampleUser2 does not exist

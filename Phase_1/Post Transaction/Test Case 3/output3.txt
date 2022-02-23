@@ -1,0 +1,11 @@
+Output:
+	Invalid: No input given
+
+Output:
+	Invalid Syntax
+
+Output:
+	Invalid: Need to be within 1-9 bedrooms
+
+Output:
+	Valid: input accepted

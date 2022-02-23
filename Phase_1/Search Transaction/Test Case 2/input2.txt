@@ -1,0 +1,14 @@
+Insert Rental Price:
+
+
+Insert Rental Price: 
+	helloWorld
+
+Insert Rental Price:
+	1000.00
+
+Insert Rental Price:
+	-1.00
+
+Insert Rental Price:
+	170.00

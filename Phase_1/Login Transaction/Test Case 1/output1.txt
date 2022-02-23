@@ -1,0 +1,9 @@
+Output:
+	Valid: Here are the available units.
+
+Output:
+	Invalid: Login failed, exampleUser2 does not exist.
+
+Output:
+	Invalid: no input detected.
+	

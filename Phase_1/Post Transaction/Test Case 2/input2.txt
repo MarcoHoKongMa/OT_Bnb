@@ -1,0 +1,14 @@
+Insert Rental Price per night:
+
+
+Insert Rental Price per night:
+	helloWorld
+
+Insert Rental Price per night:
+	1000.00
+
+Insert Rental Price per night:
+	-1.00
+
+Insert Rental Price per night:
+	170.00
