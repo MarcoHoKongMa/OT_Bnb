@@ -55,7 +55,11 @@ public class App {
         System.out.println();
         User user = new User(currentUsername, currentAccountStatus);
         user.getTransactions();
-
+        // note each time you run main, its will post these properties to the file
+        //user.post("Oshawa",500f,4);
+        //user.post("Oshawa",500f,9);
+        user.search("Oshawa",500.0, 4L);
+        user.rent(4,2);
 
     } 
     
