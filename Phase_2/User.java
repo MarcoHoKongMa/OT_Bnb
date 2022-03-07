@@ -1,5 +1,9 @@
 package Phase_2;
 
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.util.Scanner;
+
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -7,12 +11,13 @@ import org.json.simple.parser.ParseException;
 
 import java.io.*;
 import java.util.Objects;
-import java.util.Scanner;
+import java.io.IOException;
 
 public class User{
     private String userName;
     private String accountStatus;
     private String daily_transaction;
+    public static Singleton singleton = Singleton.getInstance();
 
     public User(String userName, String accountStatus){
         this.userName = userName;
@@ -27,26 +32,100 @@ public class User{
             System.out.println("Delete");
             System.out.println("Post");
             System.out.println("Search");
-            System.out.println("Rent");
+            System.out.println("Rent\n");
         }
         else if(this.accountStatus.equals("Full-Standard")){
             System.out.println("Available Transactions:");
             System.out.println("Logout");
             System.out.println("Post");
-            System.out.println("Rent");
+            System.out.println("Rent\n");
         }
         else if(this.accountStatus.equals("Rent-Standard")){
             System.out.println("Logout");
-            System.out.println("Rent");
+            System.out.println("Rent\n");
         }
         else if(this.accountStatus.equals("Post-Standard")){
             System.out.println("Logout");
-            System.out.println("Post");
+            System.out.println("Post\n");
         }
     }
 
     public void create(){
+        boolean validUsername = false;
+        Scanner scanner = new Scanner(System.in);
+        String userInput1;
+        String userInput2;
+        JSONParser jsonParser = new JSONParser();
+        JSONObject userDetails = new JSONObject();
+        JSONObject userObject = new JSONObject();
+
+        try(FileReader fileReader = new FileReader("Phase_2/Files/current_users.json")){
+            Object obj = jsonParser.parse(fileReader);
+            JSONArray jsonArray = (JSONArray) obj;
+
+            while(validUsername == false){
+                System.out.println("\nEnter new username:");
+                userInput1 = scanner.nextLine();
+    
+                if (singleton.usernames.contains(userInput1)){
+                    System.out.println(userInput1 + "already exists.\n");
+                }else{
+                    singleton.usernames.add(userInput1);
+                    System.out.println("\nEnter account status:");
+                    userInput2 = scanner.nextLine();
+                    singleton.accountStatuses.add(userInput2);
+    
+                    userDetails.put("username", userInput1);
+                    userDetails.put("accountStatus", userInput2);
+                    userObject.put("user", userDetails);
+    
+                    jsonArray.add(userObject);
+    
+                    FileWriter fileWriter = new FileWriter("Phase_2/Files/current_users.json");
+                    fileWriter.write(jsonArray.toJSONString());
+                    fileWriter.flush();
+    
+                    fileWriter.close();
+                    scanner.close();
+                }
+            }
+        } catch (ParseException | IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void delete(){
+        boolean validUsername = false;
+        Scanner scanner = new Scanner(System.in);
+        int index;
+        JSONParser jsonParser = new JSONParser();
         
+        while(validUsername == false){
+            System.out.println("\nEnter username:");
+            String userInput;
+            userInput = scanner.nextLine();
+
+            if (singleton.usernames.contains(userInput)){
+                index = singleton.usernames.indexOf(userInput);
+                singleton.usernames.remove(index);
+                singleton.accountStatuses.remove(index);
+
+                try(FileReader fileReader = new FileReader("Phase_2/Files/current_users.json")){
+                    Object obj = jsonParser.parse(fileReader);
+                    JSONArray jsonArray = (JSONArray) obj;
+                    jsonArray.remove(index);
+
+                    FileWriter fileWriter = new FileWriter("Phase_2/Files/current_users.json");
+                    fileWriter.write(jsonArray.toJSONString());
+                    fileWriter.flush();
+    
+                    fileWriter.close();
+                    scanner.close();
+                }catch (ParseException | IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     public JSONArray readRentals() {

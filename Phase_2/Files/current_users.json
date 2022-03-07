@@ -1,18 +1,1 @@
-[
-    {"user": {
-        "username": "Ting999",
-        "accountStatus": "Admin"
-    }},
-    {"user": {
-        "username": "Marco",
-        "accountStatus": "Full-Standard"
-    }},
-    {"user": {
-        "username": "Jack",
-        "accountStatus": "Rent-Standard"
-    }},
-    {"user": {
-        "username": "Semilore",
-        "accountStatus": "Post-Standard"
-    }}
-]
+[{"user":{"accountStatus":"Admin","username":"Ting999"}},{"user":{"accountStatus":"Full-Standard","username":"Marco"}},{"user":{"accountStatus":"Post-Standard","username":"Semilore"}}]

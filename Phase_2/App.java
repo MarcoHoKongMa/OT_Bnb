@@ -6,13 +6,10 @@ import java.io.FileReader;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.*;
-import java.util.ArrayList;
 import java.util.Scanner; 
 
 public class App {
-    public static ArrayList<String> usernames = new ArrayList<>();
-    public static ArrayList<String> accountStatuses = new ArrayList<>();
-
+    public static Singleton singleton = Singleton.getInstance();
     public static void main(String[] args){
 
         // Load in the current_users.json file
@@ -40,12 +37,11 @@ public class App {
         System.out.println("Enter Username:");
         while(authorize == false){
             currentUsername = scanner.nextLine();
-            if (usernames.contains(currentUsername)){
+            if (singleton.usernames.contains(currentUsername)){
                 System.out.println("Login Successful");
                 authorize = true;
-                int index = usernames.indexOf(currentUsername);
-                currentAccountStatus = accountStatuses.get(index);
-                scanner.close();
+                int index = singleton.usernames.indexOf(currentUsername);
+                currentAccountStatus = singleton.accountStatuses.get(index);
 
             }else{
                 System.out.println("Invalid user\n");
@@ -55,6 +51,24 @@ public class App {
         System.out.println();
         User user = new User(currentUsername, currentAccountStatus);
         user.getTransactions();
+
+        System.out.println("Enter Transaction:");
+        boolean exit = false;
+        String userInput;
+
+        while(exit == false){
+            userInput = scanner.nextLine();
+
+            if (userInput.equals("Create")){
+                user.create();
+            }else if(userInput.equals("Delete")){
+                user.delete();
+            }
+            else if (userInput.equals("Logout")){
+                exit = true;
+            }
+        }
+
         // note each time you run main, its will post these properties to the file
         //user.post("Oshawa",500f,4);
         //user.post("Oshawa",500f,9);
@@ -65,7 +79,7 @@ public class App {
     
     private static void parseJSONArray(JSONObject user){
         JSONObject userObj = (JSONObject) user.get("user");
-        usernames.add((String) userObj.get("username"));
-        accountStatuses.add((String) userObj.get("accountStatus"));
+        singleton.usernames.add((String) userObj.get("username"));
+        singleton.accountStatuses.add((String) userObj.get("accountStatus"));
     }
 }
