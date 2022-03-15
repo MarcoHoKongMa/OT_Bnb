@@ -34,8 +34,8 @@ public class App {
         String currentAccountStatus = "";
         boolean authorize = false;
         
-        System.out.println("Enter Username:");
         while(authorize == false){
+            System.out.print("Enter Username: ");
             currentUsername = scanner.nextLine();
             if (singleton.usernames.contains(currentUsername)){
                 System.out.println("Login Successful");
@@ -49,32 +49,46 @@ public class App {
         }
 
         System.out.println();
-        User user = new User(currentUsername, currentAccountStatus);
+        User user = new User(currentUsername, currentAccountStatus, scanner);
         user.getTransactions();
-
-        System.out.println("Enter Transaction:");
+        System.out.print("Enter Transaction: ");
         boolean exit = false;
         String userInput;
 
-        while(exit == false){
-            userInput = scanner.nextLine();
+        while(exit == false) {
+            userInput = scanner.nextLine().toLowerCase();
 
-            if (userInput.equals("Create")){
+            if (userInput.equals("create")){
                 user.create();
-            }else if(userInput.equals("Delete")){
-                user.delete();
+            }else if(userInput.equals("delete")){
+                user.delete(currentUsername);
             }
-            else if (userInput.equals("Logout")){
+            else if (userInput.equals("logout")){
+                user.logout();
                 exit = true;
+                break;
             }
+            else if (userInput.equals("post")) {
+                user.post(currentUsername);
+            }
+            else if (userInput.equals("search")) {
+                user.search();
+            }
+            else if (userInput.equals("rent")) {
+                user.rent();
+            }
+
+            System.out.println();
+            user.getTransactions();
+            System.out.print("Enter Transaction: ");
         }
 
         // note each time you run main, its will post these properties to the file
-        //user.post("Oshawa",500f,4);
-        //user.post("Oshawa",500f,9);
-        user.search("Oshawa",500.0, 4L);
-        user.rent(4,2);
-
+        // user.post("Oshawa",500f,4);
+        // user.post("Oshawa",500f,9);
+        // user.search("Oshawa",500.0, 4L);
+        // user.rent(2,2);
+        scanner.close();
     } 
     
     private static void parseJSONArray(JSONObject user){

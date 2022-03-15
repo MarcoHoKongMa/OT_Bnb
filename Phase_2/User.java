@@ -4,27 +4,35 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.Scanner;
 
+import javax.management.Query;
+
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.Objects;
+import java.util.Queue;
 import java.io.IOException;
 
-public class User{
+public class User {
     private String userName;
     private String accountStatus;
-    private String daily_transaction;
+    private ArrayList<Long> newRentals = new ArrayList<>();
+    private Queue<String> daily_transaction = new LinkedList<>();
     public static Singleton singleton = Singleton.getInstance();
+    private Scanner scanner;
 
-    public User(String userName, String accountStatus){
+    public User(String userName, String accountStatus, Scanner scanner) {
         this.userName = userName;
         this.accountStatus = accountStatus;
+        this.scanner = scanner;
     }
 
-    public void getTransactions(){
+    public void getTransactions() {
         if(this.accountStatus.equals("Admin")){
             System.out.println("Available Transactions:");
             System.out.println("Logout");
@@ -50,9 +58,20 @@ public class User{
         }
     }
 
-    public void create(){
+    public void logout() {
+        try {
+            FileWriter dailyWriter = new FileWriter("Phase_2/Files/daily_transaction.txt", true);
+            while (!(daily_transaction.isEmpty())) {
+                dailyWriter.write(daily_transaction.remove() + "\n");
+            }
+            dailyWriter.close();
+        } catch (IOException e) {
+            System.out.println("Unable To Save Daily Transactions");
+        }
+    }
+
+    public void create() {
         boolean validUsername = false;
-        Scanner scanner = new Scanner(System.in);
         String userInput1;
         String userInput2;
         JSONParser jsonParser = new JSONParser();
@@ -64,14 +83,21 @@ public class User{
             JSONArray jsonArray = (JSONArray) obj;
 
             while(validUsername == false){
-                System.out.println("\nEnter new username:");
+                System.out.print("\nEnter New Username: ");
                 userInput1 = scanner.nextLine();
     
                 if (singleton.usernames.contains(userInput1)){
                     System.out.println(userInput1 + "already exists.\n");
-                }else{
+                }
+                else if (userInput1.length() > 15) {
+                    System.out.println("Username Can Only Have 15 Characters At Most");
+                }
+                else if (userInput1.equals("") || userInput1.equals(" ")) {
+                    System.out.println("No Username Provided");
+                }
+                else{
                     singleton.usernames.add(userInput1);
-                    System.out.println("\nEnter account status:");
+                    System.out.print("\nEnter Account Status: ");
                     userInput2 = scanner.nextLine();
                     singleton.accountStatuses.add(userInput2);
     
@@ -86,7 +112,10 @@ public class User{
                     fileWriter.flush();
     
                     fileWriter.close();
-                    scanner.close();
+                    validUsername = true;
+                    System.out.println("Added " + userInput1 + "(" + userInput2 + ")" +" to OT Bnb");
+                    // Save To Daily Transaction File
+                    daily_transaction.add("Added " + userInput1 + "(" + userInput2 + ")" + " to OT Bnb");
                 }
             }
         } catch (ParseException | IOException e) {
@@ -94,37 +123,63 @@ public class User{
         }
     }
 
-    public void delete(){
-        boolean validUsername = false;
-        Scanner scanner = new Scanner(System.in);
+    public void delete(String currentUser) {
         int index;
         JSONParser jsonParser = new JSONParser();
         
-        while(validUsername == false){
-            System.out.println("\nEnter username:");
-            String userInput;
-            userInput = scanner.nextLine();
+        System.out.print("\nDelete User(Username): ");
+        String userInput;
+        userInput = scanner.nextLine();
 
-            if (singleton.usernames.contains(userInput)){
-                index = singleton.usernames.indexOf(userInput);
-                singleton.usernames.remove(index);
-                singleton.accountStatuses.remove(index);
+        if (singleton.usernames.contains(userInput) && !(userInput.equals(currentUser))){
+            index = singleton.usernames.indexOf(userInput);
+            singleton.usernames.remove(index);
+            singleton.accountStatuses.remove(index);
 
-                try(FileReader fileReader = new FileReader("Phase_2/Files/current_users.json")){
-                    Object obj = jsonParser.parse(fileReader);
-                    JSONArray jsonArray = (JSONArray) obj;
-                    jsonArray.remove(index);
+            try(FileReader fileReader = new FileReader("Phase_2/Files/current_users.json")){
+                Object obj = jsonParser.parse(fileReader);
+                JSONArray jsonArray = (JSONArray) obj;
+                jsonArray.remove(index);
 
-                    FileWriter fileWriter = new FileWriter("Phase_2/Files/current_users.json");
-                    fileWriter.write(jsonArray.toJSONString());
-                    fileWriter.flush();
-    
-                    fileWriter.close();
-                    scanner.close();
-                }catch (ParseException | IOException e) {
-                    e.printStackTrace();
+                FileWriter fileWriter = new FileWriter("Phase_2/Files/current_users.json");
+                fileWriter.write(jsonArray.toJSONString());
+                fileWriter.flush();
+
+                fileWriter.close();
+
+                // Remove Rental Units From Deleted User
+                Queue<JSONObject> delObj = new LinkedList<>();
+                JSONArray rentList = readRentals();
+                int rental_count = rentList.size();
+                String fUser;
+                for (int i = 0; i < rental_count; i++) {
+                    JSONObject rObj = (JSONObject)rentList.get(i);
+                    fUser = (String) rObj.get("owner");
+                    if (userInput.equals(fUser)) {
+                        delObj.add(rObj);
+                    }
                 }
+                while (!(delObj.isEmpty())) {
+                    rentList.remove(delObj.remove());
+                }
+                try(FileWriter rentalWriter = new FileWriter("Phase_2/Files/available_rental_unit.json")){
+                    rentalWriter.write(rentList.toJSONString());
+                } catch (IOException e) {
+                    System.out.println("Failed To Update Deleted Rental Units");
+                }
+
+                System.out.println("Deleted " + userInput + " to OT Bnb");
+                // Save To Daily Transaction File
+                daily_transaction.add("Deleted " + userInput + " to OT Bnb");
+            }catch (ParseException | IOException e) {
+                e.printStackTrace();
             }
+        }
+        else if (userInput.equals(currentUser)) {
+            System.out.println("Deleting Yourself Is Not Prohibited");
+        }
+        else {
+            System.out.println(userInput + " is NOT A USER");
         }
     }
 
@@ -147,8 +202,17 @@ public class User{
     }
 
     //post takes in city, rental price, number of bedrooms
-    public void post(String city, float price, int num_brooms){
+    public void post(String currentUser) {
         //post will create a rent object and add it to the list of rental properties, then writes it to the rent file
+        String city;
+        float price;
+        int num_brooms;
+        System.out.print("Enter Rental City: ");
+        city = scanner.nextLine();
+        System.out.print("Enter Rental Price: ");
+        price = Float.parseFloat(scanner.nextLine());
+        System.out.print("Enter Avaliable Bedrooms: ");
+        num_brooms = Integer.parseInt(scanner.nextLine());
 
         JSONArray rentList = readRentals();
         int id_count = rentList.size();
@@ -159,9 +223,20 @@ public class User{
         obj.put("price", price);
         obj.put("num_of_bedrooms", num_brooms);
         obj.put("rented", false);
-        //increment id_count when adding the field for each rental unit
-        id_count+=1;
-        obj.put("ID", id_count);
+        obj.put("owner", currentUser);
+
+        // Insert Into Unused ID Or Create New ID If Not Avaliable
+        int insert_id = 1;
+        long fID;
+        for (int i = 0; i < id_count; i++) {
+            JSONObject rObj = (JSONObject)rentList.get(i);
+            fID = (long) rObj.get("ID");
+            if ((long) insert_id < fID) {
+                break;
+            }
+            insert_id++;
+        }
+        obj.put("ID", insert_id);
 
         // add the new rental object to the array
         rentList.add(obj);
@@ -170,16 +245,50 @@ public class User{
         } catch (IOException e) {
             e.printStackTrace();
         }
+        newRentals.add((long)(id_count + 1));
+        System.out.println("Please note that transactions cannot be accepted until you next session");
 
-
+        // Save To Daily Transaction File
+        daily_transaction.add("Posted " + "Rental ID #"+ (id_count + 1) + ": "+ num_brooms + " Bedrooms, Location: " + city + ", Price Per Night: $" + price);
     }
 
-    public void search(String city, double price, Long num_broom){
+    public void search() {
         // Serach will read the list of rent properties and will display the id and price of properties available
+
+        // Request City, Price, Number of bedrooms
+        String city;
+        double price = 0.0;
+        boolean wildPrice = false;
+        long num_broom = 0;
+        boolean wildBroom = false;
+        System.out.println("\n* can be used as wildcard value or as \'All\'");
+        System.out.print("Search City Name: ");
+        city = scanner.nextLine();
+        System.out.print("Search Price(Maximum): ");
+        try {
+            price = Double.parseDouble(scanner.nextLine());
+        } catch (NumberFormatException e) {
+            wildPrice = true;
+        }
+        System.out.print("Search Number of Bedrooms(Minimum): ");
+        try {
+            num_broom = Long.parseLong(scanner.nextLine());
+        } catch (NumberFormatException e) {
+            wildBroom = true;
+        }
+
         JSONArray rentList = readRentals();
         //JSONArray resultList = new JSONArray();
         int id_count = rentList.size();
 
+        System.out.print("\nSearch Result for ");
+        if (wildBroom) { System.out.print("All Number of"); } else { System.out.print(num_broom); }
+        System.out.print(" Bedrooms at ");
+        if (wildPrice) { System.out.print("All Prices"); } else { System.out.print("$" + price); }
+        System.out.print(" in ");
+        if (city.equals("*")) { System.out.println("All Cities"); } else { System.out.println(city); }
+
+        String result;
         for(int x =0; x < id_count; x++){
             JSONObject obj = (JSONObject)rentList.get(x);
             //fcity, fprice, fnob, frent, fID are the fields of the objects
@@ -188,26 +297,58 @@ public class User{
             Long fnob = (Long) obj.get("num_of_bedrooms");
             boolean frent = (boolean) obj.get("rented");
             Long fID = (Long) obj.get("ID");
-            if((Objects.equals(city, fcity)) && (price == fprice) && (Objects.equals(num_broom, fnob)) && (frent == false)){
-                System.out.println("property "+ fID+ "in, "+ city+" with"+ fnob+ "meets the description" );
-
+            if((Objects.equals(city, fcity) || city.equals("*")) && ((price >= fprice) || wildPrice) && ((num_broom <= fnob) || wildBroom) && (frent == false) && !(newRentals.contains(fID))){
+                result = "Rental ID #"+ fID+ ": "+ fnob + " Bedrooms, Location: " + fcity + ", Price Per Night: $" + fprice;
+                System.out.println(result);
+                // Save To Daily Transaction File
+                daily_transaction.add("Searched " + result);
             }
         }
-
-
+        System.out.print("\nPress Enter to continue");
+        scanner.nextLine();
     }
-    public void rent(int id, int num_nights){
+
+    public void rent() {
         //check to see if the property exist
         //if it does, display the poperty cost per night
         //and total cost overall for the amount of nights (num_nights * cost)
+
+        // Request Rental Id & Number of nights
+        int id = 0;
+        int num_nights = 0;
+        do {
+            try {
+                System.out.print("Insert Rental ID: ");
+                id = Integer.parseInt(scanner.nextLine());
+            } catch (NumberFormatException e) {
+                System.out.println("INVALID RENTAL ID");
+            }
+        } while (id < 1);
+        do {
+            try {
+                System.out.print("Number of nights you will be staying: ");
+                num_nights = Integer.parseInt(scanner.nextLine());
+                if (num_nights < 1 || num_nights > 14) {
+                    System.out.println("Rental Only Avaliable between 1-14 nights");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("NEED A VALID NUMBER");
+            }
+        } while (num_nights < 1 || num_nights > 14);
+
         JSONArray rentList = readRentals();
         //JSONArray resultList = new JSONArray();
         int id_count = rentList.size();
         Double fprice =0.0;
         boolean frent = false;
-        Long fID = new Long(0);
+        Long fID = 0L;
         JSONObject obj = new JSONObject();
         int x =0;
+
+        if (id > id_count) {
+            System.out.println("\nGiven Rental ID Does Not Exists");
+            return;
+        }
 
         for(x =0; x < id_count; x++){
             obj = (JSONObject)rentList.get(x);
@@ -221,20 +362,22 @@ public class User{
                break;
             }
             if((id == fID) && (frent)){
-                System.out.println("property is not available for rent");
-                break;
+                System.out.println("\nProperty is not available for rent");
+                return;
+            }
+            if((id == fID) && newRentals.contains(fID)){
+                System.out.println("\nNew Rentals Are Not Avaliable Until Your Next Session");
+                return;
             }
         }
 
-        if(num_nights < 15 && num_nights >0 && (!frent))
-        {
+        if(!frent) {
             double cost = num_nights * fprice;
-            System.out.println("property "+ fID+ " cost per night : "+ fprice);
-            System.out.println("with the number of nights, the total cost is: "+ cost);
-            System.out.println("Do you want to rent? Yes or No");
-            //Scanner scanner = new Scanner(System.in);
-            String input = "yes";
-            if( input.equals("yes")){
+            System.out.println("\nRental #"+ fID+ ", Cost Per Night: $"+ fprice);
+            System.out.println("Your Total Cost For " + num_nights + " Nights: $"+ cost);
+            System.out.println("Confirm Rental? y/n");
+            String input = scanner.nextLine().toLowerCase();
+            if (input.equals("y")){
                 frent = true;
                 obj.remove("rented");
                 obj.put("rented", frent);
@@ -245,21 +388,15 @@ public class User{
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-
+                String rent = "Rented Rental #" + id + " For " + num_nights + " Nights From " + obj.get("owner");
+                System.out.println("You Have " + rent);
+                // Save To Daily Transaction File
+                daily_transaction.add(rent);
             }
         }
-        else if (num_nights > 14){
-            System.out.println("The amount of nights exceeds the maximum allowed nights of 14");
-        }
-
-
-
-
-
     }
 
-
-    public String toString(){
+    public String toString() {
         return "Current User: "+userName + "\n" + "Account Status: "+accountStatus;
     }
 }
