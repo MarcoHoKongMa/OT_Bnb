@@ -6,7 +6,7 @@ public class Singleton {
     private static Singleton single_instance = null;
 
     public ArrayList<String> usernames;
-    public ArrayList<String> accountStatuses = new ArrayList<>();
+    public ArrayList<String> accountStatuses;
 
     // Private Constructor
     private Singleton(){

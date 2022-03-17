@@ -1,34 +1,15 @@
 package Phase_2;
 
+import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.FileReader;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.*;
 import java.util.Scanner; 
 
 public class App {
     public static Singleton singleton = Singleton.getInstance();
     public static void main(String[] args){
 
-        // Load in the current_users.json file
-        try(FileReader fileReader = new FileReader("Phase_2/Files/current_users.json")){
-            JSONParser jsonParser = new JSONParser();
-            Object obj = jsonParser.parse(fileReader);
-            // Transfer all the data in the object into a JSONArray
-            JSONArray usersList = (JSONArray) obj;
-
-            // Iterate over the usersList
-            usersList.forEach(record -> parseJSONArray((JSONObject)record));
-        }catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-
+        // Load in the current_users.txt file
+        readFile();
         Scanner scanner = new Scanner(System.in);
         String currentUsername = "";
         String currentAccountStatus = "";
@@ -91,9 +72,25 @@ public class App {
         scanner.close();
     } 
     
-    private static void parseJSONArray(JSONObject user){
-        JSONObject userObj = (JSONObject) user.get("user");
-        singleton.usernames.add((String) userObj.get("username"));
-        singleton.accountStatuses.add((String) userObj.get("accountStatus"));
+    private static void readFile(){
+        int blankIndex = 0;
+        try {
+            File file = new File("Phase_2/Files/current_users.txt");
+            Scanner scanner = new Scanner(file);
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                for(int i=0; i<line.length(); i++){
+                    if (line.charAt(i) == ' '){
+                        blankIndex = i;
+                        i = line.length();
+                    }
+                }
+                singleton.usernames.add(line.substring(0, blankIndex));
+                singleton.accountStatuses.add(line.substring(13, 15));
+            }
+            scanner.close();
+          } catch (FileNotFoundException e) {
+            e.printStackTrace();
+          }
     }
 }

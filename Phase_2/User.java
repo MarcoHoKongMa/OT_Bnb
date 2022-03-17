@@ -5,6 +5,7 @@ import java.io.FileWriter;
 import java.util.Scanner;
 
 import javax.management.Query;
+import javax.swing.text.StyledEditorKit.BoldAction;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -13,10 +14,14 @@ import org.json.simple.parser.ParseException;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.LinkedList;
 import java.util.Objects;
 import java.util.Queue;
 import java.io.IOException;
+
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 public class User {
     private String userName;
@@ -33,7 +38,7 @@ public class User {
     }
 
     public void getTransactions() {
-        if(this.accountStatus.equals("Admin")){
+        if(this.accountStatus.equals("AA")){
             System.out.println("Available Transactions:");
             System.out.println("Logout");
             System.out.println("Create");
@@ -42,17 +47,17 @@ public class User {
             System.out.println("Search");
             System.out.println("Rent\n");
         }
-        else if(this.accountStatus.equals("Full-Standard")){
+        else if(this.accountStatus.equals("FS")){
             System.out.println("Available Transactions:");
             System.out.println("Logout");
             System.out.println("Post");
             System.out.println("Rent\n");
         }
-        else if(this.accountStatus.equals("Rent-Standard")){
+        else if(this.accountStatus.equals("RS")){
             System.out.println("Logout");
             System.out.println("Rent\n");
         }
-        else if(this.accountStatus.equals("Post-Standard")){
+        else if(this.accountStatus.equals("PS")){
             System.out.println("Logout");
             System.out.println("Post\n");
         }
@@ -60,11 +65,18 @@ public class User {
 
     public void logout() {
         try {
-            FileWriter dailyWriter = new FileWriter("Phase_2/Files/daily_transaction.txt", true);
+            BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("Phase_2/Files/daily_transaction.txt", true));
             while (!(daily_transaction.isEmpty())) {
-                dailyWriter.write(daily_transaction.remove() + "\n");
+                if (new File("Phase_2/Files/daily_transaction.txt").length() != 0){
+                    bufferedWriter.newLine();
+                    bufferedWriter.write(daily_transaction.remove());
+                    bufferedWriter.flush();
+                }else{
+                    bufferedWriter.write(daily_transaction.remove());
+                    bufferedWriter.flush();
+                }
             }
-            dailyWriter.close();
+            bufferedWriter.close();
         } catch (IOException e) {
             System.out.println("Unable To Save Daily Transactions");
         }
@@ -72,16 +84,14 @@ public class User {
 
     public void create() {
         boolean validUsername = false;
-        String userInput1;
-        String userInput2;
-        JSONParser jsonParser = new JSONParser();
-        JSONObject userDetails = new JSONObject();
-        JSONObject userObject = new JSONObject();
+        boolean validAccountStatus = false;
+        String userInput1="";
+        String userInput2="";
+        String account;
+        String dailyTransactionString = "";
 
-        try(FileReader fileReader = new FileReader("Phase_2/Files/current_users.json")){
-            Object obj = jsonParser.parse(fileReader);
-            JSONArray jsonArray = (JSONArray) obj;
-
+        try(FileReader fileReader = new FileReader("Phase_2/Files/current_users.txt")){
+            // Provide user name and check to see if it exists
             while(validUsername == false){
                 System.out.print("\nEnter New Username: ");
                 userInput1 = scanner.nextLine();
@@ -92,60 +102,94 @@ public class User {
                 else if (userInput1.length() > 15) {
                     System.out.println("Username Can Only Have 15 Characters At Most");
                 }
-                else if (userInput1.equals("") || userInput1.equals(" ")) {
+                else if (userInput1.isEmpty() || userInput1.isBlank()) {
                     System.out.println("No Username Provided");
                 }
                 else{
                     singleton.usernames.add(userInput1);
-                    System.out.print("\nEnter Account Status: ");
-                    userInput2 = scanner.nextLine();
-                    singleton.accountStatuses.add(userInput2);
-    
-                    userDetails.put("username", userInput1);
-                    userDetails.put("accountStatus", userInput2);
-                    userObject.put("user", userDetails);
-    
-                    jsonArray.add(userObject);
-    
-                    FileWriter fileWriter = new FileWriter("Phase_2/Files/current_users.json");
-                    fileWriter.write(jsonArray.toJSONString());
-                    fileWriter.flush();
-    
-                    fileWriter.close();
                     validUsername = true;
-                    System.out.println("Added " + userInput1 + "(" + userInput2 + ")" +" to OT Bnb");
-                    // Save To Daily Transaction File
-                    daily_transaction.add("Added " + userInput1 + "(" + userInput2 + ")" + " to OT Bnb");
                 }
             }
-        } catch (ParseException | IOException e) {
+
+            while(validAccountStatus == false){
+                System.out.print("\nEnter Account Status: ");
+                    userInput2 = scanner.nextLine().toUpperCase();
+                    
+                    if (userInput2.toLowerCase().equals("ADMIN") || userInput2.toUpperCase().equals("AA")){
+                        singleton.accountStatuses.add("AA");
+                        validAccountStatus = true;
+                    }
+                    else if (userInput2.toLowerCase().equals("FULL-STANDARD") || userInput2.toUpperCase().equals("FS")){
+                        singleton.accountStatuses.add("FS");
+                        validAccountStatus = true;
+                    }
+                    else if (userInput2.toLowerCase().equals("RENT-STANDARD") || userInput2.toUpperCase().equals("RS")){
+                        singleton.accountStatuses.add("RS");
+                        validAccountStatus = true;
+                    }
+                    else if (userInput2.toLowerCase().equals("POST-STANDARD") || userInput2.toUpperCase().equals("PS")){
+                        singleton.accountStatuses.add("PS");
+                        validAccountStatus = true;
+                    }
+            }
+
+            account = userInput1;
+            while(account.length() < 13){
+                account+=" ";
+            }
+            account+=userInput2;
+            
+            // Write to the current_users.txt file
+            BufferedWriter writer = new BufferedWriter(new FileWriter("Phase_2/Files/current_users.txt", true));
+            if (new File("Phase_2/Files/current_users.txt").length() != 0){
+                writer.newLine();
+            }
+            writer.write(account);
+            writer.flush();
+            writer.close();
+            
+            System.out.println("\nAdded " + userInput1 + "(" + userInput2 + ")" +" to OT Bnb");
+            
+            // Write to daily_transaction.txt file
+            dailyTransactionString = "01 "+account;
+
+            while(dailyTransactionString.length()<53){
+                dailyTransactionString+=" ";
+            }
+            daily_transaction.add(dailyTransactionString);
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     public void delete(String currentUser) {
         int index;
-        JSONParser jsonParser = new JSONParser();
-        
+        List<String> lines = new ArrayList<String>();
         System.out.print("\nDelete User(Username): ");
         String userInput;
         userInput = scanner.nextLine();
+        String dailyTransactionString = "";
 
         if (singleton.usernames.contains(userInput) && !(userInput.equals(currentUser))){
             index = singleton.usernames.indexOf(userInput);
             singleton.usernames.remove(index);
-            singleton.accountStatuses.remove(index);
 
-            try(FileReader fileReader = new FileReader("Phase_2/Files/current_users.json")){
-                Object obj = jsonParser.parse(fileReader);
-                JSONArray jsonArray = (JSONArray) obj;
-                jsonArray.remove(index);
+            try(FileReader fileReader = new FileReader("Phase_2/Files/current_users.txt")){
 
-                FileWriter fileWriter = new FileWriter("Phase_2/Files/current_users.json");
-                fileWriter.write(jsonArray.toJSONString());
-                fileWriter.flush();
+                // Remove the user from the text file
+                lines = Files.readAllLines(Paths.get("Phase_2/Files/current_users.txt"));
+                lines.remove(index);
 
-                fileWriter.close();
+                BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("Phase_2/Files/current_users.txt"));
+                for(int i=0; i<lines.size(); i++){
+                    if (new File("Phase_2/Files/current_users.txt").length() != 0){
+                        bufferedWriter.newLine();
+                    }
+                    bufferedWriter.write(lines.get(i));
+                    bufferedWriter.flush();
+                }
+                bufferedWriter.close();
+                
 
                 // Remove Rental Units From Deleted User
                 Queue<JSONObject> delObj = new LinkedList<>();
@@ -169,9 +213,21 @@ public class User {
                 }
 
                 System.out.println("Deleted " + userInput + " to OT Bnb");
+                
+                
                 // Save To Daily Transaction File
-                daily_transaction.add("Deleted " + userInput + " to OT Bnb");
-            }catch (ParseException | IOException e) {
+                dailyTransactionString = "02 ";
+                while(userInput.length() < 13){
+                    userInput+=" ";
+                }
+                dailyTransactionString+=userInput;
+                dailyTransactionString+=singleton.accountStatuses.get(index);
+                singleton.accountStatuses.remove(index);
+                while(dailyTransactionString.length()<53){
+                    dailyTransactionString+=" ";
+                }
+                daily_transaction.add(dailyTransactionString);
+            }catch (IOException e) {
                 e.printStackTrace();
             }
         }
