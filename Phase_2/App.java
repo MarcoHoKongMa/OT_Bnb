@@ -42,7 +42,7 @@ public class App {
             if (userInput.equals("create")){
                 user.create();
             }else if(userInput.equals("delete")){
-                user.delete(currentUsername);
+                user.delete();
             }
             else if (userInput.equals("logout")){
                 user.logout();
@@ -50,7 +50,7 @@ public class App {
                 break;
             }
             else if (userInput.equals("post")) {
-                user.post(currentUsername);
+                user.post();
             }
             else if (userInput.equals("search")) {
                 user.search();
@@ -64,11 +64,6 @@ public class App {
             System.out.print("Enter Transaction: ");
         }
 
-        // note each time you run main, its will post these properties to the file
-        // user.post("Oshawa",500f,4);
-        // user.post("Oshawa",500f,9);
-        // user.search("Oshawa",500.0, 4L);
-        // user.rent(2,2);
         scanner.close();
     } 
     
@@ -86,7 +81,7 @@ public class App {
                     }
                 }
                 singleton.usernames.add(line.substring(0, blankIndex));
-                singleton.accountStatuses.add(line.substring(13, 15));
+                singleton.accountStatuses.add(line.substring(11, 13));
             }
             scanner.close();
           } catch (FileNotFoundException e) {

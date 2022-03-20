@@ -1,24 +1,11 @@
 package Phase_2;
 
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.util.Scanner;
-
-import javax.management.Query;
-import javax.swing.text.StyledEditorKit.BoldAction;
-
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-
 import java.io.*;
+import java.util.Scanner;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.LinkedList;
-import java.util.Objects;
 import java.util.Queue;
-import java.io.IOException;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -26,7 +13,7 @@ import java.nio.file.Paths;
 public class User {
     private String userName;
     private String accountStatus;
-    private ArrayList<Long> newRentals = new ArrayList<>();
+    private ArrayList<Rental> rentals = new ArrayList<>();
     private Queue<String> daily_transaction = new LinkedList<>();
     public static Singleton singleton = Singleton.getInstance();
     private Scanner scanner;
@@ -35,6 +22,7 @@ public class User {
         this.userName = userName;
         this.accountStatus = accountStatus;
         this.scanner = scanner;
+        readRentals(rentals);
     }
 
     public void getTransactions() {
@@ -64,6 +52,18 @@ public class User {
     }
 
     public void logout() {
+        // Save Logout Transaction
+        String username = userName;
+        while (username.length() < 10) {
+            username += " ";
+        }
+        int index = singleton.usernames.indexOf(userName);
+        String endSession = "00 " + username + " " + singleton.accountStatuses.get(index);
+        while (endSession.length() < 53) {
+            endSession += " ";
+        }
+        daily_transaction.add(endSession);
+        
         try {
             BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("Phase_2/Files/daily_transaction.txt", true));
             while (!(daily_transaction.isEmpty())) {
@@ -99,8 +99,8 @@ public class User {
                 if (singleton.usernames.contains(userInput1)){
                     System.out.println(userInput1 + "already exists.\n");
                 }
-                else if (userInput1.length() > 15) {
-                    System.out.println("Username Can Only Have 15 Characters At Most");
+                else if (userInput1.length() > 10) {
+                    System.out.println("Username Can Only Have 10 Characters At Most");
                 }
                 else if (userInput1.isEmpty() || userInput1.isBlank()) {
                     System.out.println("No Username Provided");
@@ -134,7 +134,7 @@ public class User {
             }
 
             account = userInput1;
-            while(account.length() < 13){
+            while(account.length() < 11) {
                 account+=" ";
             }
             account+=userInput2;
@@ -162,7 +162,7 @@ public class User {
         }
     }
 
-    public void delete(String currentUser) {
+    public void delete() {
         int index;
         List<String> lines = new ArrayList<String>();
         System.out.print("\nDelete User(Username): ");
@@ -170,7 +170,7 @@ public class User {
         userInput = scanner.nextLine();
         String dailyTransactionString = "";
 
-        if (singleton.usernames.contains(userInput) && !(userInput.equals(currentUser))){
+        if (singleton.usernames.contains(userInput) && !(userInput.equals(userName))){
             index = singleton.usernames.indexOf(userInput);
             singleton.usernames.remove(index);
 
@@ -190,34 +190,66 @@ public class User {
                 }
                 bufferedWriter.close();
                 
-
                 // Remove Rental Units From Deleted User
-                Queue<JSONObject> delObj = new LinkedList<>();
-                JSONArray rentList = readRentals();
-                int rental_count = rentList.size();
-                String fUser;
-                for (int i = 0; i < rental_count; i++) {
-                    JSONObject rObj = (JSONObject)rentList.get(i);
-                    fUser = (String) rObj.get("owner");
-                    if (userInput.equals(fUser)) {
-                        delObj.add(rObj);
+                Queue<String> availableTickets = new LinkedList<>();
+                String cUser;
+                String cCity;
+                int num_brooms;
+                float cPrice;
+                String rPrice;
+                Boolean cStatus;
+                String rStatus = "F";
+                int cNon;
+                String non;
+                for (int j = 0; j < rentals.size(); j++) {
+                    Rental rentUnit = rentals.get(j);
+                    cUser = rentUnit.getOwner(); cCity = rentUnit.getCity(); num_brooms = rentUnit.getNumOfBedrooms();
+                    while (cUser.length() < 10) {
+                        cUser += " ";
+                    }
+                    while (cCity.length() < 15) {
+                        cCity += " ";
+                    }
+
+                    cPrice = rentUnit.getPrice(); cStatus = rentUnit.getRented(); cNon = rentUnit.getNightRemain();
+                    rPrice = String.format("%.02f", cPrice);
+                    while (rPrice.length() < 6) {
+                        rPrice = "0" + rPrice;
+                    }
+                    if (cStatus) { rStatus = "T"; }
+                    non = Integer.toString(cNon);
+                    if (non.length() < 2) {
+                        non = "0" + non;
+                    }
+                    if (cUser.trim().equals(userInput)) {
+                        // Save To Daily Transaction File
+                        daily_transaction.add("02 " + cUser + " " + singleton.accountStatuses.get(index) + " " + rentUnit.getId() + " " + cCity + " " + num_brooms + " " + rPrice + " " + non);
+                    }
+                    else {
+                        availableTickets.add(rentUnit.getId() + " " + cUser + " " + cCity + " " + num_brooms + " " + rPrice + " " + rStatus + " " + non);
                     }
                 }
-                while (!(delObj.isEmpty())) {
-                    rentList.remove(delObj.remove());
-                }
-                try(FileWriter rentalWriter = new FileWriter("Phase_2/Files/available_rental_unit.json")){
-                    rentalWriter.write(rentList.toJSONString());
+                readRentals(rentals);
+
+                try {
+                    BufferedWriter ticketWriter = new BufferedWriter(new FileWriter("Phase_2/Files/available_tickets.txt"));
+                    while (!(availableTickets.isEmpty())) {
+                        ticketWriter.write(availableTickets.remove());
+                        if(availableTickets.size() > 0) { ticketWriter.newLine(); }
+                        ticketWriter.flush();
+                    }
+                    ticketWriter.close();
+                } catch (FileNotFoundException e) {
+                    System.out.println("\nFailed To Delete User's Rentals: File Not Found");
                 } catch (IOException e) {
-                    System.out.println("Failed To Update Deleted Rental Units");
+                    e.printStackTrace();
                 }
 
-                System.out.println("Deleted " + userInput + " to OT Bnb");
-                
+                System.out.println("\nDeleted " + userInput + " to OT Bnb");
                 
                 // Save To Daily Transaction File
                 dailyTransactionString = "02 ";
-                while(userInput.length() < 13){
+                while(userInput.length() < 11){
                     userInput+=" ";
                 }
                 dailyTransactionString+=userInput;
@@ -231,81 +263,151 @@ public class User {
                 e.printStackTrace();
             }
         }
-        else if (userInput.equals(currentUser)) {
-            System.out.println("Deleting Yourself Is Not Prohibited");
+        else if (userInput.equals(userName)) {
+            System.out.println("\nDeleting Yourself Is Prohibited");
         }
         else {
-            System.out.println(userInput + " is NOT A USER");
+            System.out.println("\n" + userInput + " is NOT A USER");
         }
     }
 
-    public JSONArray readRentals() {
-        // read the array from the available_rental_unit.json files and return it
-        JSONArray rentList = new JSONArray();
-        try (FileReader fileReader = new FileReader("Phase_2/Files/available_rental_unit.json")) {
-            JSONParser jsonParser = new JSONParser();
-            Object obj = jsonParser.parse(fileReader);
-            // Transfer all the data in the object into a JSONArray
-            rentList = (JSONArray) obj;
+    public void readRentals(ArrayList<Rental> r) {
+        // Read Available Rentals
+        try {
+            File file = new File("Phase_2/Files/available_tickets.txt");
+            Scanner rScanner = new Scanner(file);
+            Rental rent;
+            String id;
+            String owner;
+            String city;
+            int num_of_bedrooms;
+            float price;
+            boolean rented;
+            int nights_remain;
+            while (rScanner.hasNextLine()) {
+                String line = rScanner.nextLine();
+                id = line.substring(0, 8);
+                owner = line.substring(9, 19).trim();
+                city = line.substring(20, 35).trim();
+                num_of_bedrooms = Integer.parseInt(line.substring(36, 37));
+                price = Float.parseFloat(line.substring(38, 44));
+                if (line.substring(45,46).equals("T")) {
+                    rented = true;
+                }
+                else {
+                    rented = false;
+                }
+                nights_remain = Integer.parseInt(line.substring(47));
+                rent = new Rental(id, owner, city, num_of_bedrooms, price, rented, nights_remain);
+                r.add(rent);
+            }
+            rScanner.close();
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ParseException e) {
-            e.printStackTrace();
+            System.out.println("\nFailed To Obtain Rental Information");
         }
-        return rentList;
     }
 
     //post takes in city, rental price, number of bedrooms
-    public void post(String currentUser) {
+    public void post() {
         //post will create a rent object and add it to the list of rental properties, then writes it to the rent file
         String city;
         float price;
         int num_brooms;
         System.out.print("Enter Rental City: ");
         city = scanner.nextLine();
-        System.out.print("Enter Rental Price: ");
-        price = Float.parseFloat(scanner.nextLine());
-        System.out.print("Enter Avaliable Bedrooms: ");
-        num_brooms = Integer.parseInt(scanner.nextLine());
-
-        JSONArray rentList = readRentals();
-        int id_count = rentList.size();
-
-        // create jason object to store written file as a dictionary
-        JSONObject obj = new JSONObject();
-        obj.put("city",city);
-        obj.put("price", price);
-        obj.put("num_of_bedrooms", num_brooms);
-        obj.put("rented", false);
-        obj.put("owner", currentUser);
-
-        // Insert Into Unused ID Or Create New ID If Not Avaliable
-        int insert_id = 1;
-        long fID;
-        for (int i = 0; i < id_count; i++) {
-            JSONObject rObj = (JSONObject)rentList.get(i);
-            fID = (long) rObj.get("ID");
-            if ((long) insert_id < fID) {
-                break;
+        do {
+            System.out.print("Enter Rental Price: ");
+            try {
+                price = Float.parseFloat(scanner.nextLine());
+                if (price < 0f || price > 999f) {
+                    System.out.println("You Can Only Post Price Between $0 - $999");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("INVALID SYNTAX(Numbers Only)");
+                price = -1f;
             }
-            insert_id++;
-        }
-        obj.put("ID", insert_id);
+        } while (price < 0f || price > 999f);
+        do {
+            System.out.print("Enter Avaliable Bedrooms: ");
+            try {
+                num_brooms = Integer.parseInt(scanner.nextLine());
+                if (num_brooms < 1 || num_brooms > 9) {
+                    System.out.println("You Can Only Post 1 - 9 Bedrooms");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("INVALID SYNTAX(Numbers Only)");
+                num_brooms = 0;
+            }
+        } while (num_brooms < 1 || num_brooms > 9);
 
-        // add the new rental object to the array
-        rentList.add(obj);
-        try(FileWriter fileWriter = new FileWriter("Phase_2/Files/available_rental_unit.json")){
-            fileWriter.write(rentList.toJSONString());
+        // Create Unique Alpha-Numeric IDs
+        ArrayList<Rental> updatedRental = new ArrayList<>();
+        readRentals(updatedRental);
+        ArrayList<String> rentalIDs = new ArrayList<>();
+        for (int i = 0; i < updatedRental.size(); i++) {
+            rentalIDs.add(updatedRental.get(i).getId());
+        }
+        StringBuilder id = new StringBuilder("00000000");
+        while (rentalIDs.contains(id.toString())) {
+            for (int i = id.length() - 1; i >= 0; i--) {
+                if (id.charAt(i) == 'z') {
+                    if (i == 0) {       //Rentals List Is Full
+                        System.out.println("Unable To Post Rental: Rentals List Is FULL");
+                        break;
+                    }
+                    id.setCharAt(i, '0');
+                }
+                else {
+                    if (id.charAt(i) == '9') {
+                        id.setCharAt(i, 'A');
+                    }
+                    else if (id.charAt(i) == 'Z') {
+                        id.setCharAt(i, 'a');
+                    }
+                    else {
+                        char c = id.charAt(i);
+                        id.setCharAt(i, ++c);
+                    }
+                    break;
+                }
+            }
+        }
+
+        // Adding Space To Unused Fields
+        String username = userName;
+        while (username.length() < 10) {
+            username += " ";
+        }
+        while (city.length() < 15) {
+            city += " ";
+        }
+        String rPrice = String.format("%.02f", price);
+        while (rPrice.length() < 6) {
+            rPrice = "0" + rPrice;
+        }
+
+        // Update Available Rentals
+        try {
+            BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("Phase_2/Files/available_tickets.txt", true));
+            if (new File("Phase_2/Files/available_tickets.txt").length() != 0){
+                bufferedWriter.newLine();
+                bufferedWriter.write(id.toString() + " " + username + " " + city + " " + num_brooms + " " + rPrice + " F 00");
+                bufferedWriter.flush();
+            }else{
+                bufferedWriter.write(id.toString() + " " + username + " " + city + " " + num_brooms + " " + rPrice + " F 00");
+                bufferedWriter.flush();
+            }
+            bufferedWriter.close();
+        } catch (FileNotFoundException e) {
+            System.out.println("\nFailed To Post Rental: File Not Found");
         } catch (IOException e) {
             e.printStackTrace();
         }
-        newRentals.add((long)(id_count + 1));
-        System.out.println("Please note that transactions cannot be accepted until you next session");
+        System.out.println("\nPlease note that transactions on new rentals cannot be accepted until you next session");
 
         // Save To Daily Transaction File
-        daily_transaction.add("Posted " + "Rental ID #"+ (id_count + 1) + ": "+ num_brooms + " Bedrooms, Location: " + city + ", Price Per Night: $" + price);
+        int index = singleton.usernames.indexOf(userName);
+        daily_transaction.add("03 " + username + " " + singleton.accountStatuses.get(index) + " " + id.toString() + " " + city + " " + num_brooms + " " + rPrice + " 00");
     }
 
     public void search() {
@@ -313,29 +415,25 @@ public class User {
 
         // Request City, Price, Number of bedrooms
         String city;
-        double price = 0.0;
+        float price = 0f;
         boolean wildPrice = false;
-        long num_broom = 0;
+        int num_broom = 0;
         boolean wildBroom = false;
         System.out.println("\n* can be used as wildcard value or as \'All\'");
         System.out.print("Search City Name: ");
         city = scanner.nextLine();
         System.out.print("Search Price(Maximum): ");
         try {
-            price = Double.parseDouble(scanner.nextLine());
+            price = Float.parseFloat(scanner.nextLine());
         } catch (NumberFormatException e) {
             wildPrice = true;
         }
         System.out.print("Search Number of Bedrooms(Minimum): ");
         try {
-            num_broom = Long.parseLong(scanner.nextLine());
+            num_broom = Integer.parseInt(scanner.nextLine());
         } catch (NumberFormatException e) {
             wildBroom = true;
         }
-
-        JSONArray rentList = readRentals();
-        //JSONArray resultList = new JSONArray();
-        int id_count = rentList.size();
 
         System.out.print("\nSearch Result for ");
         if (wildBroom) { System.out.print("All Number of"); } else { System.out.print(num_broom); }
@@ -344,20 +442,33 @@ public class User {
         System.out.print(" in ");
         if (city.equals("*")) { System.out.println("All Cities"); } else { System.out.println(city); }
 
-        String result;
-        for(int x =0; x < id_count; x++){
-            JSONObject obj = (JSONObject)rentList.get(x);
-            //fcity, fprice, fnob, frent, fID are the fields of the objects
-            String fcity= (String) obj.get("city");
-            Double fprice= (Double) obj.get("price");
-            Long fnob = (Long) obj.get("num_of_bedrooms");
-            boolean frent = (boolean) obj.get("rented");
-            Long fID = (Long) obj.get("ID");
-            if((Objects.equals(city, fcity) || city.equals("*")) && ((price >= fprice) || wildPrice) && ((num_broom <= fnob) || wildBroom) && (frent == false) && !(newRentals.contains(fID))){
-                result = "Rental ID #"+ fID+ ": "+ fnob + " Bedrooms, Location: " + fcity + ", Price Per Night: $" + fprice;
-                System.out.println(result);
-                // Save To Daily Transaction File
-                daily_transaction.add("Searched " + result);
+        String fID;
+        String fcity;
+        float fprice;
+        int fnob;
+        String username = userName;
+        while (username.length() < 10) {
+            username += " ";
+        }
+        String accStatus = singleton.accountStatuses.get(singleton.usernames.indexOf(userName));
+        String rPrice;
+        for (int i = 0; i < rentals.size(); i++) {
+            Rental rent = rentals.get(i);
+            if (!(rent.getRented())) {
+                if ((rent.getCity().equals(city) || city.equals("*")) && (rent.getPrice() == price || wildPrice) && (rent.getNumOfBedrooms() == num_broom || wildBroom)) {
+                    fID = rent.getId(); fcity = rent.getCity(); fprice = rent.getPrice(); fnob = rent.getNumOfBedrooms();
+                    System.out.println("Rental ID #"+ fID+ ": "+ fnob + " Bedrooms, Location: " + fcity + ", Price Per Night: $" + fprice);
+
+                    // Save To Daily Transaction File
+                    while (fcity.length() < 15) {
+                        fcity += " ";
+                    }
+                    rPrice = String.format("%.02f", fprice);
+                    while (rPrice.length() < 6) {
+                        rPrice = "0" + rPrice;
+                    }
+                    daily_transaction.add("04 " + username + " " + accStatus + " " + fID + " " + fcity + " " + fnob + " " + rPrice + " 00");
+                }
             }
         }
         System.out.print("\nPress Enter to continue");
@@ -370,16 +481,15 @@ public class User {
         //and total cost overall for the amount of nights (num_nights * cost)
 
         // Request Rental Id & Number of nights
-        int id = 0;
+        String id;
         int num_nights = 0;
         do {
-            try {
-                System.out.print("Insert Rental ID: ");
-                id = Integer.parseInt(scanner.nextLine());
-            } catch (NumberFormatException e) {
-                System.out.println("INVALID RENTAL ID");
+            System.out.print("Insert Rental ID: ");
+            id = scanner.nextLine();
+            if (!(id.length() == 8)) {
+                System.out.println("INVALID ID(Requires A 8 Characters Rental ID)");
             }
-        } while (id < 1);
+        } while (!(id.length() == 8));
         do {
             try {
                 System.out.print("Number of nights you will be staying: ");
@@ -392,64 +502,91 @@ public class User {
             }
         } while (num_nights < 1 || num_nights > 14);
 
-        JSONArray rentList = readRentals();
-        //JSONArray resultList = new JSONArray();
-        int id_count = rentList.size();
-        Double fprice =0.0;
-        boolean frent = false;
-        Long fID = 0L;
-        JSONObject obj = new JSONObject();
-        int x =0;
+        String fID;
+        float fprice;
+        for (int i = 0; i < rentals.size(); i++) {
+            Rental rent = rentals.get(i);
+            if (!(rent.getRented()) && rent.getId().equals(id)) {
+                fID = rent.getId();
+                fprice = rent.getPrice();
+                float cost = fprice * (float) num_nights;
+                System.out.println("\nRental #"+ fID+ ", Cost Per Night: $"+ fprice);
+                System.out.println("Your Total Cost For " + num_nights + " Nights: $"+ cost);
+                System.out.println("Confirm Rental? y/n");
+                String input = scanner.nextLine().toLowerCase();
+                if (input.equals("y")) {
+                    // Update Rented Status & Number Of Nights
+                    try {
+                        String cUser;
+                        String cCity;
+                        int num_brooms;
+                        float cPrice;
+                        String rPrice;
+                        Boolean cStatus;
+                        String rStatus = "F";
+                        int cNon;
+                        String non;
+                        BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("Phase_2/Files/available_tickets.txt"));
+                        for (int j = 0; j < rentals.size(); j++) {
+                            Rental rentUnit = rentals.get(j);
+                            cUser = rentUnit.getOwner(); cCity = rentUnit.getCity(); num_brooms = rentUnit.getNumOfBedrooms();
+                            while (cUser.length() < 10) {
+                                cUser += " ";
+                            }
+                            while (cCity.length() < 15) {
+                                cCity += " ";
+                            }
 
-        if (id > id_count) {
-            System.out.println("\nGiven Rental ID Does Not Exists");
-            return;
-        }
-
-        for(x =0; x < id_count; x++){
-            obj = (JSONObject)rentList.get(x);
-            //fcity, fprice, fnob, frent, fID are the fields of the objects
-            //String fcity= (String) obj.get("city");
-            fprice= (Double) obj.get("price");
-            //Long fnob = (Long) obj.get("num_of_bedrooms");
-            frent = (boolean) obj.get("rented");
-            fID = (Long) obj.get("ID");
-            if((id == fID) && (!frent)){
-               break;
-            }
-            if((id == fID) && (frent)){
-                System.out.println("\nProperty is not available for rent");
-                return;
-            }
-            if((id == fID) && newRentals.contains(fID)){
-                System.out.println("\nNew Rentals Are Not Avaliable Until Your Next Session");
-                return;
-            }
-        }
-
-        if(!frent) {
-            double cost = num_nights * fprice;
-            System.out.println("\nRental #"+ fID+ ", Cost Per Night: $"+ fprice);
-            System.out.println("Your Total Cost For " + num_nights + " Nights: $"+ cost);
-            System.out.println("Confirm Rental? y/n");
-            String input = scanner.nextLine().toLowerCase();
-            if (input.equals("y")){
-                frent = true;
-                obj.remove("rented");
-                obj.put("rented", frent);
-                rentList.set(x,obj);
-                // rewrite the file
-                try(FileWriter fileWriter = new FileWriter("Phase_2/Files/available_rental_unit.json")){
-                    fileWriter.write(rentList.toJSONString());
-                } catch (IOException e) {
-                    e.printStackTrace();
+                            if (rentUnit.getId() != fID) {
+                                cPrice = rentUnit.getPrice(); cStatus = rentUnit.getRented(); cNon = rentUnit.getNightRemain();
+                                rPrice = String.format("%.02f", cPrice);
+                                while (rPrice.length() < 6) {
+                                    rPrice = "0" + rPrice;
+                                }
+                                if (cStatus) { rStatus = "T"; }
+                                non = Integer.toString(cNon);
+                                if (non.length() < 2) {
+                                    non = "0" + non;
+                                }
+                            }
+                            else {
+                                rPrice = String.format("%.02f", fprice);
+                                while (rPrice.length() < 6) {
+                                    rPrice = "0" + rPrice;
+                                }
+                                rStatus = "T";
+                                non = Integer.toString(num_nights);
+                                if (non.length() < 2) {
+                                    non = "0" + non;
+                                }
+                                int index = singleton.usernames.indexOf(userName);
+                                String username = userName;
+                                while (username.length() < 10) {
+                                    username += " ";
+                                }
+                                // Save To Daily Transaction File
+                                daily_transaction.add("05 " + username + " " + singleton.accountStatuses.get(index) + " " + rent.getId() + " " + cCity + " " + num_brooms + " " + rPrice + " " + non);
+                                System.out.println("\nYou Have Rented Rental #" + id + " For " + num_nights + " Nights From " + cUser);
+                            }
+                            bufferedWriter.write(rentUnit.getId() + " " + cUser + " " + cCity + " " + num_brooms + " " + rPrice + " " + rStatus + " " + non);
+                            if (j < rentals.size() - 1) { bufferedWriter.newLine(); }
+                            bufferedWriter.flush();
+                        }
+                        bufferedWriter.close();
+                    } catch (FileNotFoundException e) {
+                        System.out.println("\nFailed To Rent Rental: File Not Found");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
-                String rent = "Rented Rental #" + id + " For " + num_nights + " Nights From " + obj.get("owner");
-                System.out.println("You Have " + rent);
-                // Save To Daily Transaction File
-                daily_transaction.add(rent);
+                return;
+            }
+            else if (rent.getRented() && rent.getId().equals(id)) {
+                System.out.println("Rental #" + id + " Is Currently Not Available");
+                return;
             }
         }
+        System.out.println("Rental #" + id + " Does Not Exist");
     }
 
     public String toString() {
