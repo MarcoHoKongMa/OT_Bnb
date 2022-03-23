@@ -2,6 +2,8 @@ package Phase_2;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Scanner; 
 
 public class App {
@@ -14,8 +16,20 @@ public class App {
             System.exit(1);
         }
 
+        // Avoid Duplicate Arguments
+        ArrayList<String> argsList = new ArrayList<>();
+        for (String arg : args) {
+            if (argsList.contains(arg)) {
+                System.out.println("App: Duplicate Arguments Found");
+                System.exit(1);
+            }
+            argsList.add(arg);
+        }
+
         // Load in the current_users.txt file
         readUserFile(args[0]);
+        testTickets(args[1]);
+        testTransaction(args[2]);
         Scanner scanner = new Scanner(System.in);
         String currentUsername = "";
         String currentAccountStatus = "";
@@ -73,15 +87,16 @@ public class App {
         scanner.close();
     } 
     
-    private static void readUserFile(String userPath){
+    private static void readUserFile(String userPath) {
         int blankIndex = 0;
         try {
             File file = new File(userPath);
-            Scanner scanner = new Scanner(file);
-            while (scanner.hasNextLine()) {
-                String line = scanner.nextLine();
+            Scanner fscanner = new Scanner(file);
+            while (fscanner.hasNextLine()) {
+                String line = fscanner.nextLine();
                 if (line.length() != 13) {
                     System.out.println("App: Invalid Current Users File");
+                    System.exit(1);
                 }
                 for(int i=0; i<line.length(); i++){
                     if (line.charAt(i) == ' '){
@@ -92,10 +107,47 @@ public class App {
                 singleton.usernames.add(line.substring(0, blankIndex));
                 singleton.accountStatuses.add(line.substring(11, 13));
             }
-            scanner.close();
-          } catch (FileNotFoundException e) {
+            fscanner.close();
+          } catch (IOException e) {
             System.out.println("App: Current Users File Not Found");
             System.exit(1);
           }
+    }
+
+    private static void testTickets(String rentalFile) {
+        try {
+            File file = new File(rentalFile);
+            Scanner fscanner = new Scanner(file);
+            while (fscanner.hasNextLine()) {
+                String line = fscanner.nextLine();
+                System.out.println(line.length());
+                if (line.length() != 49) {
+                    System.out.println("App: Invalid Available Tickets File");
+                    System.exit(1);
+                }
+            }
+            fscanner.close();
+        } catch (IOException e) {
+            System.out.println("App: Available Tickets File Not Found");
+            System.exit(1);
+        }
+    }
+
+    private static void testTransaction(String transactionFile) {
+        try {
+            File file = new File(transactionFile);
+            Scanner fscanner = new Scanner(file);
+            while (fscanner.hasNextLine()) {
+                String line = fscanner.nextLine();
+                if (line.length() != 53) {
+                    System.out.println("App: Invalid Daily Transaction File");
+                    System.exit(1);
+                }
+            }
+            fscanner.close();
+        } catch (IOException e) {
+            System.out.println("App: Daily Transaction File Not Found");
+            System.exit(1);
+        }
     }
 }
