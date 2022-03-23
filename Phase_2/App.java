@@ -8,8 +8,14 @@ public class App {
     public static Singleton singleton = Singleton.getInstance();
     public static void main(String[] args){
 
+        // Check For Sufficient Arguments
+        if (args.length != 3) {
+            System.out.println("Usage: Phase_2.App <current_users_path> <available_tickets_path> <daily_transaction_path>");
+            System.exit(1);
+        }
+
         // Load in the current_users.txt file
-        readFile();
+        readUserFile(args[0]);
         Scanner scanner = new Scanner(System.in);
         String currentUsername = "";
         String currentAccountStatus = "";
@@ -30,7 +36,7 @@ public class App {
         }
 
         System.out.println();
-        User user = new User(currentUsername, currentAccountStatus, scanner);
+        User user = new User(currentUsername, currentAccountStatus, args[1], scanner);
         user.getTransactions();
         System.out.print("Enter Transaction: ");
         boolean exit = false;
@@ -40,12 +46,12 @@ public class App {
             userInput = scanner.nextLine().toLowerCase();
 
             if (userInput.equals("create")){
-                user.create();
+                user.create(args[0]);
             }else if(userInput.equals("delete")){
-                user.delete();
+                user.delete(args[0]);
             }
             else if (userInput.equals("logout")){
-                user.logout();
+                user.logout(args[2]);
                 exit = true;
                 break;
             }
@@ -67,13 +73,16 @@ public class App {
         scanner.close();
     } 
     
-    private static void readFile(){
+    private static void readUserFile(String userPath){
         int blankIndex = 0;
         try {
-            File file = new File("Phase_2/Files/current_users.txt");
+            File file = new File(userPath);
             Scanner scanner = new Scanner(file);
             while (scanner.hasNextLine()) {
                 String line = scanner.nextLine();
+                if (line.length() != 13) {
+                    System.out.println("App: Invalid Current Users File");
+                }
                 for(int i=0; i<line.length(); i++){
                     if (line.charAt(i) == ' '){
                         blankIndex = i;
@@ -85,7 +94,8 @@ public class App {
             }
             scanner.close();
           } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            System.out.println("App: Current Users File Not Found");
+            System.exit(1);
           }
     }
 }

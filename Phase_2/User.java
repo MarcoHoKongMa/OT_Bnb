@@ -13,16 +13,17 @@ import java.nio.file.Paths;
 public class User {
     private String userName;
     private String accountStatus;
+    private String rentalFile;
     private ArrayList<Rental> rentals = new ArrayList<>();
     private Queue<String> daily_transaction = new LinkedList<>();
     public static Singleton singleton = Singleton.getInstance();
     private Scanner scanner;
 
-    public User(String userName, String accountStatus, Scanner scanner) {
+    public User(String userName, String accountStatus, String rentalFile, Scanner scanner) {
         this.userName = userName;
         this.accountStatus = accountStatus;
         this.scanner = scanner;
-        readRentals(rentals);
+        this.rentalFile = rentalFile; readRentals(rentals);
     }
 
     public void getTransactions() {
@@ -51,7 +52,7 @@ public class User {
         }
     }
 
-    public void logout() {
+    public void logout(String transactionFile) {
         // Save Logout Transaction
         String username = userName;
         while (username.length() < 10) {
@@ -64,25 +65,32 @@ public class User {
         }
         daily_transaction.add(endSession);
         
-        try {
-            BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("Phase_2/Files/daily_transaction.txt", true));
-            while (!(daily_transaction.isEmpty())) {
-                if (new File("Phase_2/Files/daily_transaction.txt").length() != 0){
-                    bufferedWriter.newLine();
-                    bufferedWriter.write(daily_transaction.remove());
-                    bufferedWriter.flush();
-                }else{
-                    bufferedWriter.write(daily_transaction.remove());
-                    bufferedWriter.flush();
+        boolean saved = false;
+        do {
+            try {
+                BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(transactionFile, true));
+                while (!(daily_transaction.isEmpty())) {
+                    if (new File(transactionFile).length() != 0){
+                        bufferedWriter.newLine();
+                        bufferedWriter.write(daily_transaction.remove());
+                        bufferedWriter.flush();
+                    }else{
+                        bufferedWriter.write(daily_transaction.remove());
+                        bufferedWriter.flush();
+                    }
                 }
+                bufferedWriter.close();
+                saved = true;
+            } catch (IOException e) {
+                System.out.println("App: Failed To Save Daily Transactions");
+                System.out.println("App: Daily Transaction File Not Found");
+                System.out.print("Insert Valid Daily Transaction File Path: ");
+                transactionFile = scanner.nextLine();
             }
-            bufferedWriter.close();
-        } catch (IOException e) {
-            System.out.println("Unable To Save Daily Transactions");
-        }
+        } while (!saved);
     }
 
-    public void create() {
+    public void create(String userFile) {
         boolean validUsername = false;
         boolean validAccountStatus = false;
         String userInput1="";
@@ -90,7 +98,7 @@ public class User {
         String account;
         String dailyTransactionString = "";
 
-        try(FileReader fileReader = new FileReader("Phase_2/Files/current_users.txt")){
+        try(FileReader fileReader = new FileReader(userFile)){
             // Provide user name and check to see if it exists
             while(validUsername == false){
                 System.out.print("\nEnter New Username: ");
@@ -140,8 +148,8 @@ public class User {
             account+=userInput2;
             
             // Write to the current_users.txt file
-            BufferedWriter writer = new BufferedWriter(new FileWriter("Phase_2/Files/current_users.txt", true));
-            if (new File("Phase_2/Files/current_users.txt").length() != 0){
+            BufferedWriter writer = new BufferedWriter(new FileWriter(userFile, true));
+            if (new File(userFile).length() != 0){
                 writer.newLine();
             }
             writer.write(account);
@@ -158,11 +166,13 @@ public class User {
             }
             daily_transaction.add(dailyTransactionString);
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("\nApp: Failed To Create " + userInput1 + " To OT Bnb");
+            System.out.println("\nApp: Current Users File Not Found");
+            System.out.println("Make Sure The Current Users File Is Present Before Running Create Transaction Again");
         }
     }
 
-    public void delete() {
+    public void delete(String userFile) {
         int index;
         List<String> lines = new ArrayList<String>();
         System.out.print("\nDelete User(Username): ");
@@ -174,15 +184,15 @@ public class User {
             index = singleton.usernames.indexOf(userInput);
             singleton.usernames.remove(index);
 
-            try(FileReader fileReader = new FileReader("Phase_2/Files/current_users.txt")){
+            try(FileReader fileReader = new FileReader(userFile)){
 
                 // Remove the user from the text file
-                lines = Files.readAllLines(Paths.get("Phase_2/Files/current_users.txt"));
+                lines = Files.readAllLines(Paths.get(userFile));
                 lines.remove(index);
 
-                BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("Phase_2/Files/current_users.txt"));
+                BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(userFile));
                 for(int i=0; i<lines.size(); i++){
-                    if (new File("Phase_2/Files/current_users.txt").length() != 0){
+                    if (new File(userFile).length() != 0){
                         bufferedWriter.newLine();
                     }
                     bufferedWriter.write(lines.get(i));
@@ -232,7 +242,7 @@ public class User {
                 readRentals(rentals);
 
                 try {
-                    BufferedWriter ticketWriter = new BufferedWriter(new FileWriter("Phase_2/Files/available_tickets.txt"));
+                    BufferedWriter ticketWriter = new BufferedWriter(new FileWriter(rentalFile));
                     while (!(availableTickets.isEmpty())) {
                         ticketWriter.write(availableTickets.remove());
                         if(availableTickets.size() > 0) { ticketWriter.newLine(); }
@@ -259,8 +269,10 @@ public class User {
                     dailyTransactionString+=" ";
                 }
                 daily_transaction.add(dailyTransactionString);
-            }catch (IOException e) {
-                e.printStackTrace();
+            } catch (IOException e) {
+                System.out.println("\nApp: Failed To Delete " + userInput + " To OT Bnb");
+                System.out.println("\nApp: Current Users File Not Found");
+                System.out.println("Make Sure The Current Users File Is Present Before Running Delete Transaction Again");
             }
         }
         else if (userInput.equals(userName)) {
@@ -273,38 +285,53 @@ public class User {
 
     public void readRentals(ArrayList<Rental> r) {
         // Read Available Rentals
-        try {
-            File file = new File("Phase_2/Files/available_tickets.txt");
-            Scanner rScanner = new Scanner(file);
-            Rental rent;
-            String id;
-            String owner;
-            String city;
-            int num_of_bedrooms;
-            float price;
-            boolean rented;
-            int nights_remain;
-            while (rScanner.hasNextLine()) {
-                String line = rScanner.nextLine();
-                id = line.substring(0, 8);
-                owner = line.substring(9, 19).trim();
-                city = line.substring(20, 35).trim();
-                num_of_bedrooms = Integer.parseInt(line.substring(36, 37));
-                price = Float.parseFloat(line.substring(38, 44));
-                if (line.substring(45,46).equals("T")) {
-                    rented = true;
+        boolean validRentals = true;
+        do {
+            try {
+                File file = new File(rentalFile);
+                Scanner rScanner = new Scanner(file);
+                Rental rent;
+                String id;
+                String owner;
+                String city;
+                int num_of_bedrooms;
+                float price;
+                boolean rented;
+                int nights_remain;
+                validRentals = true;
+                while (rScanner.hasNextLine()) {
+                    String line = rScanner.nextLine();
+                    if (line.length() != 49) {
+                        System.out.println("\nApp: Invalid Available Tickets File");
+                        System.out.print("Insert Valid Tickets File Path(Or type \"exit\" if you would not wish to do so at the current time): ");
+                        rentalFile = scanner.nextLine();
+                        if (rentalFile.equals("exit")) { System.exit(1); }
+                        validRentals = false;
+                    }
+                    id = line.substring(0, 8);
+                    owner = line.substring(9, 19).trim();
+                    city = line.substring(20, 35).trim();
+                    num_of_bedrooms = Integer.parseInt(line.substring(36, 37));
+                    price = Float.parseFloat(line.substring(38, 44));
+                    if (line.substring(45,46).equals("T")) {
+                        rented = true;
+                    }
+                    else {
+                        rented = false;
+                    }
+                    nights_remain = Integer.parseInt(line.substring(47));
+                    rent = new Rental(id, owner, city, num_of_bedrooms, price, rented, nights_remain);
+                    r.add(rent);
                 }
-                else {
-                    rented = false;
-                }
-                nights_remain = Integer.parseInt(line.substring(47));
-                rent = new Rental(id, owner, city, num_of_bedrooms, price, rented, nights_remain);
-                r.add(rent);
+                rScanner.close();
+            } catch (IOException e) {
+                System.out.println("\nApp: Available Tickets File Not Found");
+                System.out.print("Insert Valid Tickets File Path(Or type \"exit\" if you would not wish to do so at the current time): ");
+                rentalFile = scanner.nextLine();
+                if (rentalFile.equals("exit")) { System.exit(1); }
+                validRentals = false;
             }
-            rScanner.close();
-        } catch (FileNotFoundException e) {
-            System.out.println("\nFailed To Obtain Rental Information");
-        }
+        } while (!validRentals);
     }
 
     //post takes in city, rental price, number of bedrooms
@@ -388,8 +415,8 @@ public class User {
 
         // Update Available Rentals
         try {
-            BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("Phase_2/Files/available_tickets.txt", true));
-            if (new File("Phase_2/Files/available_tickets.txt").length() != 0){
+            BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(rentalFile, true));
+            if (new File(rentalFile).length() != 0){
                 bufferedWriter.newLine();
                 bufferedWriter.write(id.toString() + " " + username + " " + city + " " + num_brooms + " " + rPrice + " F 00");
                 bufferedWriter.flush();
@@ -398,10 +425,11 @@ public class User {
                 bufferedWriter.flush();
             }
             bufferedWriter.close();
-        } catch (FileNotFoundException e) {
-            System.out.println("\nFailed To Post Rental: File Not Found");
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("\nApp: Failed To Post New Rental");
+            System.out.println("\nApp: Available Tickets File Not Found");
+            System.out.println("Make Sure The Available Tickets File Is Present Before Running Post Transaction Again");
+            return;
         }
         System.out.println("\nPlease note that transactions on new rentals cannot be accepted until you next session");
 
@@ -526,7 +554,7 @@ public class User {
                         String rStatus = "F";
                         int cNon;
                         String non;
-                        BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("Phase_2/Files/available_tickets.txt"));
+                        BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(rentalFile));
                         for (int j = 0; j < rentals.size(); j++) {
                             Rental rentUnit = rentals.get(j);
                             cUser = rentUnit.getOwner(); cCity = rentUnit.getCity(); num_brooms = rentUnit.getNumOfBedrooms();
@@ -573,10 +601,11 @@ public class User {
                             bufferedWriter.flush();
                         }
                         bufferedWriter.close();
-                    } catch (FileNotFoundException e) {
-                        System.out.println("\nFailed To Rent Rental: File Not Found");
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        System.out.println("\nApp: Failed To Rent Rental #" + id);
+                        System.out.println("\nApp: Available Tickets File Not Found");
+                        System.out.println("Make Sure The Available Tickets File Is Present Before Running Rent Transaction Again");
+                        return;
                     }
                 }
                 return;
