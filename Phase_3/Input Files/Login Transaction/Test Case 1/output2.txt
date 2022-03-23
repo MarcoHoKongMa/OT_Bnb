@@ -1,0 +1,20 @@
+Output:
+	Invalid: Transaction failed, must first login
+
+Output:
+	Invalid: Transaction failed, must first login
+
+Output:
+	Invalid Transaction failed, must first login
+
+Output:
+	Invalid Transaction failed, must first login
+
+Output:
+	Invalid Transaction failed, must first login
+
+Output:
+	Invalid Transaction failed, must first login
+
+Output:
+	Valid: Transaction successful

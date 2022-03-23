@@ -1,0 +1,2 @@
+Output:
+	Daily Transaction File: 05 User01     AA 001      Scarborough     2 599.99 04

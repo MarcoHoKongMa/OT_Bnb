@@ -1,0 +1,11 @@
+Output: 
+	Invalid: No input given
+
+Output: 
+	Invalid Syntax
+
+Output: 
+	Invalid: Only 1-9 bedrooms are avaliable
+
+Output: 
+	Valid: number of rooms accepted
