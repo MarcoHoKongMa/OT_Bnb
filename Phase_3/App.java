@@ -10,30 +10,9 @@ public class App {
     public static Singleton singleton = Singleton.getInstance();
     public static void main(String[] args){
 
-        // Empty Output File
-        try {
-            FileWriter errWriter = new FileWriter("Phase_3/output.txt");
-            errWriter.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        // Get File Inputs
-        try {
-            File inFile = new File("Phase_3/inputs/Create Transaction/Test Case4/input.txt");
-            Scanner fScanner = new Scanner(inFile);
-            while (fScanner.hasNextLine()) {
-                String line = fScanner.nextLine();
-                singleton.inputs.add(line);
-            }
-            fScanner.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
         // Check For Sufficient Arguments
-        if (args.length != 3) {
-            System.out.println("Usage: Phase_2.App <current_users_path> <available_tickets_path> <daily_transaction_path>");
+        if (args.length != 5) {
+            System.out.println("Usage: Phase_2.App <current_users_path> <available_tickets_path> <daily_transaction_path> <input_path> <output_path>");
             System.exit(1);
         }
 
@@ -45,6 +24,27 @@ public class App {
                 System.exit(1);
             }
             argsList.add(arg);
+        }
+
+        // Empty Output File
+        try {
+            FileWriter errWriter = new FileWriter(args[4]);
+            errWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // Get File Inputs
+        try {
+            File inFile = new File(args[3]);
+            Scanner fScanner = new Scanner(inFile);
+            while (fScanner.hasNextLine()) {
+                String line = fScanner.nextLine();
+                singleton.inputs.add(line);
+            }
+            fScanner.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
         // Load in the current_users.txt file
