@@ -1,3 +1,0 @@
-Invalid: No input given
-Invalid: Needs to be within 1-25 characters
-Valid: City name accepted

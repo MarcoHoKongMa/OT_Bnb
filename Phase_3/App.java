@@ -20,7 +20,7 @@ public class App {
 
         // Get File Inputs
         try {
-            File inFile = new File("Phase_3/Create_Transaction/Test_Case1/input.txt");
+            File inFile = new File("Phase_3/inputs/Create Transaction/Test Case4/input.txt");
             Scanner fScanner = new Scanner(inFile);
             while (fScanner.hasNextLine()) {
                 String line = fScanner.nextLine();
@@ -57,7 +57,6 @@ public class App {
         boolean authorize = false;
         
         while(authorize == false){
-            System.out.print("Enter Username: ");
             currentUsername = singleton.inputs.remove();
             if (singleton.usernames.contains(currentUsername)){
                 singleton.printError("Login Successful");
@@ -71,7 +70,6 @@ public class App {
             }
         }
 
-        System.out.println();
         User user = new User(currentUsername, currentAccountStatus, args[1], scanner);
         boolean exit = false;
         String userInput;
@@ -102,8 +100,6 @@ public class App {
                 singleton.printError("Invalid Transaction");
                 System.exit(1);
             }
-
-            System.out.println();
         }
 
         scanner.close();

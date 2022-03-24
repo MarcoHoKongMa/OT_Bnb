@@ -1,7 +1,0 @@
-Logout
-Create
-Delete
-Post
-Search
-Rent
-Login

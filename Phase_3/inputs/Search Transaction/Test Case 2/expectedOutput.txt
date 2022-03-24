@@ -1,0 +1,3 @@
+Login Successful
+Search Result for All Number of Bedroooms at All Prices in All Cities
+Rental ID #00000000: 4 Bedrooms, Location: Oshawa, Price Per Night: 150

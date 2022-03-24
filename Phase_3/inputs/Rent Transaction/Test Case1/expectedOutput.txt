@@ -1,0 +1,3 @@
+Login Successful
+You Have Rented Rental #00000001 For 3 Nights From Bob
+00 Ting AA

@@ -1,0 +1,2 @@
+Login Successful
+Rental ID #00000000: 4 Bedrooms, Location: Oshawa, Price Per Night: 150

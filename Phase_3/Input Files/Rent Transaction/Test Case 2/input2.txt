@@ -1,8 +1,0 @@
-Input "Yes" or "No":
-
-
-Input "Yes" or "No":
-	Yes
-
-Input "Yes" or "No":
-	"No"

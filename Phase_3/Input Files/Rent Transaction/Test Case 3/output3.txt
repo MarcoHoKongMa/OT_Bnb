@@ -1,5 +1,0 @@
-Output:
-	Sorry this account type cannot perform the rent transaction.
-
-Output:
-	Transaction successful.

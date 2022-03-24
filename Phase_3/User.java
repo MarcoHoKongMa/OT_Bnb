@@ -475,11 +475,11 @@ public class User {
             wildBroom = true;
         }
 
-        System.out.print("\nSearch Result for ");
+        singleton.printError("\nSearch Result for ");
         if (wildBroom) { singleton.printError("All Number of"); } else { singleton.printError(Integer.toString(num_broom)); }
-        System.out.print(" Bedrooms at ");
+        singleton.printError(" Bedrooms at ");
         if (wildPrice) { singleton.printError("All Prices"); } else { singleton.printError("$" + price); }
-        System.out.print(" in ");
+        singleton.printError(" in ");
         if (city.equals("*")) { singleton.printError("All Cities"); } else { singleton.printError(city); }
 
         String fID;
