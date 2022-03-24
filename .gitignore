@@ -2,3 +2,6 @@
 out
 *.iml
 settings.json
+*.class
+Create_Transaction
+output.txt

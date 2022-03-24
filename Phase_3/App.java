@@ -1,14 +1,35 @@
 package Phase_3;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Scanner; 
 
 public class App {
     public static Singleton singleton = Singleton.getInstance();
     public static void main(String[] args){
+
+        // Empty Output File
+        try {
+            FileWriter errWriter = new FileWriter("Phase_3/output.txt");
+            errWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // Get File Inputs
+        try {
+            File inFile = new File("Phase_3/Create_Transaction/Test_Case1/input.txt");
+            Scanner fScanner = new Scanner(inFile);
+            while (fScanner.hasNextLine()) {
+                String line = fScanner.nextLine();
+                singleton.inputs.add(line);
+            }
+            fScanner.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         // Check For Sufficient Arguments
         if (args.length != 3) {
@@ -37,28 +58,26 @@ public class App {
         
         while(authorize == false){
             System.out.print("Enter Username: ");
-            currentUsername = scanner.nextLine();
+            currentUsername = singleton.inputs.remove();
             if (singleton.usernames.contains(currentUsername)){
-                System.out.println("Login Successful");
+                singleton.printError("Login Successful");
                 authorize = true;
                 int index = singleton.usernames.indexOf(currentUsername);
                 currentAccountStatus = singleton.accountStatuses.get(index);
 
             }else{
-                System.out.println("Invalid user\n");
+                singleton.printError("Invalid user\n");
                 System.exit(1);
             }
         }
 
         System.out.println();
         User user = new User(currentUsername, currentAccountStatus, args[1], scanner);
-        user.getTransactions();
-        System.out.print("Enter Transaction: ");
         boolean exit = false;
         String userInput;
 
         while(exit == false) {
-            userInput = scanner.nextLine().toLowerCase();
+            userInput = singleton.inputs.remove().toLowerCase();
 
             if (userInput.equals("create")){
                 user.create(args[0]);
@@ -80,12 +99,11 @@ public class App {
                 user.rent();
             }
             else{
+                singleton.printError("Invalid Transaction");
                 System.exit(1);
             }
 
             System.out.println();
-            user.getTransactions();
-            System.out.print("Enter Transaction: ");
         }
 
         scanner.close();

@@ -84,6 +84,7 @@ public class User {
             } catch (IOException e) {
                 System.out.println("App: Failed To Save Daily Transactions");
                 System.out.println("App: Daily Transaction File Not Found");
+                System.exit(1);
                 System.out.print("Insert Valid Daily Transaction File Path: ");
                 transactionFile = scanner.nextLine();
             }
@@ -101,19 +102,18 @@ public class User {
         try(FileReader fileReader = new FileReader(userFile)){
             // Provide user name and check to see if it exists
             while(validUsername == false){
-                System.out.print("\nEnter New Username: ");
-                userInput1 = scanner.nextLine();
+                userInput1 = singleton.inputs.remove();
     
                 if (singleton.usernames.contains(userInput1)){
-                    System.out.println(userInput1 + "already exists.\n");
+                    singleton.printError(userInput1 + "already exists.\n");
                     System.exit(1);
                 }
                 else if (userInput1.length() > 10) {
-                    System.out.println("Username Can Only Have 10 Characters At Most");
+                    singleton.printError("Username Can Only Have 10 Characters At Most");
                     System.exit(1);
                 }
                 else if (userInput1.isEmpty() || userInput1.isBlank()) {
-                    System.out.println("No Username Provided");
+                    singleton.printError("No Username Provided");
                     System.exit(1);
                 }
                 else{
@@ -123,8 +123,7 @@ public class User {
             }
 
             while(validAccountStatus == false){
-                System.out.print("\nEnter Account Status: ");
-                    userInput2 = scanner.nextLine().toUpperCase();
+                    userInput2 = singleton.inputs.remove().toUpperCase();
                     
                     if (userInput2.toLowerCase().equals("ADMIN") || userInput2.toUpperCase().equals("AA")){
                         singleton.accountStatuses.add("AA");
@@ -162,7 +161,7 @@ public class User {
             writer.flush();
             writer.close();
             
-            System.out.println("\nAdded " + userInput1 + "(" + userInput2 + ")" +" to OT Bnb");
+            singleton.printError("Added " + userInput1 + "(" + userInput2 + ")" +" to OT Bnb");
             
             // Write to daily_transaction.txt file
             dailyTransactionString = "01 "+account;
@@ -172,9 +171,9 @@ public class User {
             }
             daily_transaction.add(dailyTransactionString);
         } catch (IOException e) {
-            System.out.println("\nApp: Failed To Create " + userInput1 + " To OT Bnb");
-            System.out.println("\nApp: Current Users File Not Found");
-            System.out.println("Make Sure The Current Users File Is Present Before Running Create Transaction Again");
+            singleton.printError("App: Failed To Create " + userInput1 + " To OT Bnb");
+            singleton.printError("App: Current Users File Not Found");
+            singleton.printError("Make Sure The Current Users File Is Present Before Running Create Transaction Again");
             System.exit(1);
         }
     }
@@ -182,9 +181,8 @@ public class User {
     public void delete(String userFile) {
         int index;
         List<String> lines = new ArrayList<String>();
-        System.out.print("\nDelete User(Username): ");
         String userInput;
-        userInput = scanner.nextLine();
+        userInput = singleton.inputs.remove();
         String dailyTransactionString = "";
 
         if (singleton.usernames.contains(userInput) && !(userInput.equals(userName))){
@@ -257,14 +255,14 @@ public class User {
                     }
                     ticketWriter.close();
                 } catch (FileNotFoundException e) {
-                    System.out.println("\nFailed To Delete User's Rentals: File Not Found");
+                    singleton.printError("Failed To Delete User's Rentals: File Not Found");
                     System.exit(1);
                 } catch (IOException e) {
                     e.printStackTrace();
                     System.exit(1);
                 }
 
-                System.out.println("\nDeleted " + userInput + " to OT Bnb");
+                singleton.printError("Deleted " + userInput + " to OT Bnb");
                 
                 // Save To Daily Transaction File
                 dailyTransactionString = "02 ";
@@ -279,18 +277,18 @@ public class User {
                 }
                 daily_transaction.add(dailyTransactionString);
             } catch (IOException e) {
-                System.out.println("\nApp: Failed To Delete " + userInput + " To OT Bnb");
-                System.out.println("\nApp: Current Users File Not Found");
-                System.out.println("Make Sure The Current Users File Is Present Before Running Delete Transaction Again");
+                singleton.printError("App: Failed To Delete " + userInput + " To OT Bnb");
+                singleton.printError("App: Current Users File Not Found");
+                singleton.printError("Make Sure The Current Users File Is Present Before Running Delete Transaction Again");
                 System.exit(1);
             }
         }
         else if (userInput.equals(userName)) {
-            System.out.println("\nDeleting Yourself Is Prohibited");
+            singleton.printError("Deleting Yourself Is Prohibited");
             System.exit(1);
         }
         else {
-            System.out.println("\n" + userInput + " is NOT A USER");
+            singleton.printError("" + userInput + " is NOT A USER");
             System.exit(1);
         }
     }
@@ -314,7 +312,8 @@ public class User {
                 while (rScanner.hasNextLine()) {
                     String line = rScanner.nextLine();
                     if (line.length() != 49) {
-                        System.out.println("\nApp: Invalid Available Tickets File");
+                        singleton.printError("App: Invalid Available Tickets File");
+                        System.exit(1);
                         System.out.print("Insert Valid Tickets File Path(Or type \"exit\" if you would not wish to do so at the current time): ");
                         rentalFile = scanner.nextLine();
                         if (rentalFile.equals("exit")) { System.exit(1); }
@@ -337,7 +336,8 @@ public class User {
                 }
                 rScanner.close();
             } catch (IOException e) {
-                System.out.println("\nApp: Available Tickets File Not Found");
+                singleton.printError("App: Available Tickets File Not Found");
+                System.exit(1);
                 System.out.print("Insert Valid Tickets File Path(Or type \"exit\" if you would not wish to do so at the current time): ");
                 rentalFile = scanner.nextLine();
                 if (rentalFile.equals("exit")) { System.exit(1); }
@@ -353,28 +353,30 @@ public class User {
         float price;
         int num_brooms;
         System.out.print("Enter Rental City: ");
-        city = scanner.nextLine();
+        city = singleton.inputs.remove();
         do {
-            System.out.print("Enter Rental Price: ");
             try {
-                price = Float.parseFloat(scanner.nextLine());
+                price = Float.parseFloat(singleton.inputs.remove());
                 if (price < 0f || price > 999f) {
-                    System.out.println("You Can Only Post Price Between $0 - $999");
+                    singleton.printError("You Can Only Post Price Between $0 - $999");
+                    System.exit(1);
                 }
             } catch (NumberFormatException e) {
-                System.out.println("INVALID SYNTAX(Numbers Only)");
+                singleton.printError("INVALID SYNTAX(Numbers Only)");
+                System.exit(1);
                 price = -1f;
             }
         } while (price < 0f || price > 999f);
         do {
-            System.out.print("Enter Avaliable Bedrooms: ");
             try {
-                num_brooms = Integer.parseInt(scanner.nextLine());
+                num_brooms = Integer.parseInt(singleton.inputs.remove());
                 if (num_brooms < 1 || num_brooms > 9) {
-                    System.out.println("You Can Only Post 1 - 9 Bedrooms");
+                    singleton.printError("You Can Only Post 1 - 9 Bedrooms");
+                    System.exit(1);
                 }
             } catch (NumberFormatException e) {
-                System.out.println("INVALID SYNTAX(Numbers Only)");
+                singleton.printError("INVALID SYNTAX(Numbers Only)");
+                System.exit(1);
                 num_brooms = 0;
             }
         } while (num_brooms < 1 || num_brooms > 9);
@@ -392,6 +394,7 @@ public class User {
                 if (id.charAt(i) == 'z') {
                     if (i == 0) {       //Rentals List Is Full
                         System.out.println("Unable To Post Rental: Rentals List Is FULL");
+                        System.exit(1);
                         break;
                     }
                     id.setCharAt(i, '0');
@@ -441,9 +444,10 @@ public class User {
             System.out.println("\nApp: Failed To Post New Rental");
             System.out.println("\nApp: Available Tickets File Not Found");
             System.out.println("Make Sure The Available Tickets File Is Present Before Running Post Transaction Again");
+            System.exit(1);
             return;
         }
-        System.out.println("\nPlease note that transactions on new rentals cannot be accepted until you next session");
+        singleton.printError("Please note that transactions on new rentals cannot be accepted until you next session");
 
         // Save To Daily Transaction File
         int index = singleton.usernames.indexOf(userName);
@@ -459,28 +463,24 @@ public class User {
         boolean wildPrice = false;
         int num_broom = 0;
         boolean wildBroom = false;
-        System.out.println("\n* can be used as wildcard value or as \'All\'");
-        System.out.print("Search City Name: ");
-        city = scanner.nextLine();
-        System.out.print("Search Price(Maximum): ");
+        city = singleton.inputs.remove();
         try {
-            price = Float.parseFloat(scanner.nextLine());
+            price = Float.parseFloat(singleton.inputs.remove());
         } catch (NumberFormatException e) {
             wildPrice = true;
         }
-        System.out.print("Search Number of Bedrooms(Minimum): ");
         try {
-            num_broom = Integer.parseInt(scanner.nextLine());
+            num_broom = Integer.parseInt(singleton.inputs.remove());
         } catch (NumberFormatException e) {
             wildBroom = true;
         }
 
         System.out.print("\nSearch Result for ");
-        if (wildBroom) { System.out.print("All Number of"); } else { System.out.print(num_broom); }
+        if (wildBroom) { singleton.printError("All Number of"); } else { singleton.printError(Integer.toString(num_broom)); }
         System.out.print(" Bedrooms at ");
-        if (wildPrice) { System.out.print("All Prices"); } else { System.out.print("$" + price); }
+        if (wildPrice) { singleton.printError("All Prices"); } else { singleton.printError("$" + price); }
         System.out.print(" in ");
-        if (city.equals("*")) { System.out.println("All Cities"); } else { System.out.println(city); }
+        if (city.equals("*")) { singleton.printError("All Cities"); } else { singleton.printError(city); }
 
         String fID;
         String fcity;
@@ -497,7 +497,7 @@ public class User {
             if (!(rent.getRented())) {
                 if ((rent.getCity().equals(city) || city.equals("*")) && (rent.getPrice() == price || wildPrice) && (rent.getNumOfBedrooms() == num_broom || wildBroom)) {
                     fID = rent.getId(); fcity = rent.getCity(); fprice = rent.getPrice(); fnob = rent.getNumOfBedrooms();
-                    System.out.println("Rental ID #"+ fID+ ": "+ fnob + " Bedrooms, Location: " + fcity + ", Price Per Night: $" + fprice);
+                    singleton.printError("Rental ID #"+ fID+ ": "+ fnob + " Bedrooms, Location: " + fcity + ", Price Per Night: $" + fprice);
 
                     // Save To Daily Transaction File
                     while (fcity.length() < 15) {
@@ -511,8 +511,7 @@ public class User {
                 }
             }
         }
-        System.out.print("\nPress Enter to continue");
-        scanner.nextLine();
+        singleton.inputs.remove();
     }
 
     public void rent() {
@@ -524,21 +523,22 @@ public class User {
         String id;
         int num_nights = 0;
         do {
-            System.out.print("Insert Rental ID: ");
-            id = scanner.nextLine();
+            id = singleton.inputs.remove();
             if (!(id.length() == 8)) {
-                System.out.println("INVALID ID(Requires A 8 Characters Rental ID)");
+                singleton.printError("INVALID ID(Requires A 8 Characters Rental ID)");
+                System.exit(1);
             }
         } while (!(id.length() == 8));
         do {
             try {
-                System.out.print("Number of nights you will be staying: ");
-                num_nights = Integer.parseInt(scanner.nextLine());
+                num_nights = Integer.parseInt(singleton.inputs.remove());
                 if (num_nights < 1 || num_nights > 14) {
-                    System.out.println("Rental Only Avaliable between 1-14 nights");
+                    singleton.printError("Rental Only Avaliable between 1-14 nights");
+                    System.exit(1);
                 }
             } catch (NumberFormatException e) {
-                System.out.println("NEED A VALID NUMBER");
+                singleton.printError("NEED A VALID NUMBER");
+                System.exit(1);
             }
         } while (num_nights < 1 || num_nights > 14);
 
@@ -550,10 +550,10 @@ public class User {
                 fID = rent.getId();
                 fprice = rent.getPrice();
                 float cost = fprice * (float) num_nights;
-                System.out.println("\nRental #"+ fID+ ", Cost Per Night: $"+ fprice);
-                System.out.println("Your Total Cost For " + num_nights + " Nights: $"+ cost);
-                System.out.println("Confirm Rental? y/n");
-                String input = scanner.nextLine().toLowerCase();
+                singleton.printError("Rental #"+ fID+ ", Cost Per Night: $"+ fprice);
+                singleton.printError("Your Total Cost For " + num_nights + " Nights: $"+ cost);
+                singleton.printError("Confirm Rental? y/n");
+                String input = singleton.inputs.remove().toLowerCase();
                 if (input.equals("y")) {
                     // Update Rented Status & Number Of Nights
                     try {
@@ -606,7 +606,7 @@ public class User {
                                 }
                                 // Save To Daily Transaction File
                                 daily_transaction.add("05 " + username + " " + singleton.accountStatuses.get(index) + " " + rent.getId() + " " + cCity + " " + num_brooms + " " + rPrice + " " + non);
-                                System.out.println("\nYou Have Rented Rental #" + id + " For " + num_nights + " Nights From " + cUser);
+                                singleton.printError("You Have Rented Rental #" + id + " For " + num_nights + " Nights From " + cUser);
                             }
                             bufferedWriter.write(rentUnit.getId() + " " + cUser + " " + cCity + " " + num_brooms + " " + rPrice + " " + rStatus + " " + non);
                             if (j < rentals.size() - 1) { bufferedWriter.newLine(); }
@@ -614,20 +614,23 @@ public class User {
                         }
                         bufferedWriter.close();
                     } catch (IOException e) {
-                        System.out.println("\nApp: Failed To Rent Rental #" + id);
-                        System.out.println("\nApp: Available Tickets File Not Found");
-                        System.out.println("Make Sure The Available Tickets File Is Present Before Running Rent Transaction Again");
+                        singleton.printError("App: Failed To Rent Rental #" + id);
+                        singleton.printError("App: Available Tickets File Not Found");
+                        singleton.printError("Make Sure The Available Tickets File Is Present Before Running Rent Transaction Again");
+                        System.exit(1);
                         return;
                     }
                 }
                 return;
             }
             else if (rent.getRented() && rent.getId().equals(id)) {
-                System.out.println("Rental #" + id + " Is Currently Not Available");
+                singleton.printError("Rental #" + id + " Is Currently Not Available");
+                System.exit(1);
                 return;
             }
         }
-        System.out.println("Rental #" + id + " Does Not Exist");
+        singleton.printError("Rental #" + id + " Does Not Exist");
+        System.exit(1);
     }
 
     public String toString() {
