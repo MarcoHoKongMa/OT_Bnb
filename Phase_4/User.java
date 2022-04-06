@@ -28,27 +28,18 @@ public class User {
 
     public void getTransactions() {
         if(this.accountStatus.equals("AA")){
-            System.out.println("Available Transactions:");
-            System.out.println("Logout");
-            System.out.println("Create");
-            System.out.println("Delete");
-            System.out.println("Post");
-            System.out.println("Search");
-            System.out.println("Rent\n");
+            System.out.println(
+                "Available Transactions:\nLogout\nCreate\nDelete\nPost\nSearch\nRent\n"
+            );
         }
         else if(this.accountStatus.equals("FS")){
-            System.out.println("Available Transactions:");
-            System.out.println("Logout");
-            System.out.println("Post");
-            System.out.println("Rent\n");
+            System.out.println("Available Transactions:\nLogout\nPost\nRent\n");
         }
         else if(this.accountStatus.equals("RS")){
-            System.out.println("Logout");
-            System.out.println("Rent\n");
+            System.out.println("Logout\nRent\n");
         }
         else if(this.accountStatus.equals("PS")){
-            System.out.println("Logout");
-            System.out.println("Post\n");
+            System.out.println("Logout\nPost\n");
         }
     }
 
