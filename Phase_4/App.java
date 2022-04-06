@@ -11,7 +11,7 @@ public class App {
 
         // Check For Sufficient Arguments
         if (args.length != 3) {
-            System.out.println("Usage: Phase_2.App <current_users_path> <available_tickets_path> <daily_transaction_path>");
+            System.out.println("Usage: Phase_4.App <current_users_path> <available_tickets_path> <daily_transaction_path>");
             System.exit(1);
         }
 

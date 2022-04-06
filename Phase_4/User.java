@@ -483,7 +483,7 @@ public class User {
         for (int i = 0; i < rentals.size(); i++) {
             Rental rent = rentals.get(i);
             if (!(rent.getRented())) {
-                if ((rent.getCity().equals(city) || city.equals("*")) && (rent.getPrice() == price || wildPrice) && (rent.getNumOfBedrooms() == num_broom || wildBroom)) {
+                if ((rent.getCity().equals(city) || city.equals("*")) && (rent.getPrice() <= price || wildPrice) && (rent.getNumOfBedrooms() >= num_broom || wildBroom)) {
                     fID = rent.getId(); fcity = rent.getCity(); fprice = rent.getPrice(); fnob = rent.getNumOfBedrooms();
                     System.out.println("Rental ID #"+ fID+ ": "+ fnob + " Bedrooms, Location: " + fcity + ", Price Per Night: $" + fprice);
 
