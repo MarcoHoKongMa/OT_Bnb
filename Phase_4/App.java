@@ -86,7 +86,7 @@ public class App {
         scanner.close();
     } 
     
-    private static void readUserFile(String userPath) {
+    public static void readUserFile(String userPath) {
         int blankIndex = 0;
         try {
             File file = new File(userPath);

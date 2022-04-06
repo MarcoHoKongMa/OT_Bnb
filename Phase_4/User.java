@@ -23,7 +23,7 @@ public class User {
         this.userName = userName;
         this.accountStatus = accountStatus;
         this.scanner = scanner;
-        this.rentalFile = rentalFile; // readRentals(rentals);
+        this.rentalFile = rentalFile; readRentals(rentals);
     }
 
     public void getTransactions() {

@@ -4,18 +4,12 @@ import Phase_4.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.Scanner;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 
 public class UserTest {
 
@@ -28,13 +22,36 @@ public class UserTest {
     }
 
 
-    @ParameterizedTest
-    @ValueSource(strings = {"AA", "FS", "RS", "PS"})
-    public void getTransactionsTest(String accountStatus) {
+    @Test
+    public void getAATransactionTest() {
         System.setIn(new  ByteArrayInputStream("X".getBytes()));
-        User user = new User("Ting", accountStatus, "Phase_4/Files/available_tickets.txt", new Scanner(System.in));
+        User user = new User("Ting", "AA", "D:\\Third Year\\Software Quality Assurance\\Project\\OT_Bnb\\Phase_4\\Files\\available_tickets.txt", new Scanner(System.in));
         user.getTransactions();
         Assertions.assertEquals("Available Transactions:\nLogout\nCreate\nDelete\nPost\nSearch\nRent", outputStreamCaptor.toString().trim());
+    }
+
+    @Test
+    public void getFSTransactionTest() {
+        System.setIn(new  ByteArrayInputStream("X".getBytes()));
+        User user = new User("Ting", "FS", "D:\\Third Year\\Software Quality Assurance\\Project\\OT_Bnb\\Phase_4\\Files\\available_tickets.txt", new Scanner(System.in));
+        user.getTransactions();
+        Assertions.assertEquals("Available Transactions:\nLogout\nPost\nRent", outputStreamCaptor.toString().trim());
+    }
+
+    @Test
+    public void getRSTransactionTest() {
+        System.setIn(new  ByteArrayInputStream("X".getBytes()));
+        User user = new User("Ting", "RS", "D:\\Third Year\\Software Quality Assurance\\Project\\OT_Bnb\\Phase_4\\Files\\available_tickets.txt", new Scanner(System.in));
+        user.getTransactions();
+        Assertions.assertEquals("Logout\nRent", outputStreamCaptor.toString().trim());
+    }
+
+    @Test
+    public void getPSTransactionTest() {
+        System.setIn(new  ByteArrayInputStream("X".getBytes()));
+        User user = new User("Ting", "PS", "D:\\Third Year\\Software Quality Assurance\\Project\\OT_Bnb\\Phase_4\\Files\\available_tickets.txt", new Scanner(System.in));
+        user.getTransactions();
+        Assertions.assertEquals("Logout\nPost", outputStreamCaptor.toString().trim());
     }
 
     @AfterEach
