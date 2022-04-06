@@ -3,3 +3,5 @@ out
 *.iml
 settings.json
 *.class
+.vscode
+lib
