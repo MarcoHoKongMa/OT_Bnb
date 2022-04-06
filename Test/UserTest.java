@@ -2,7 +2,9 @@ package Test;
 
 import Phase_4.*;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.Scanner;
 
@@ -28,10 +30,11 @@ public class UserTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"AA", "FS", "RS", "PS"})
-    public void getTransactionsTest(String accountStatus){
-        User user = new User("Ting", accountStatus, "sfsfs", new Scanner(System.in));
+    public void getTransactionsTest(String accountStatus) {
+        System.setIn(new  ByteArrayInputStream("X".getBytes()));
+        User user = new User("Ting", accountStatus, "Phase_4/Files/available_tickets.txt", new Scanner(System.in));
         user.getTransactions();
-        Assertions.assertEquals("Available Transactions:\nLogout\nCreate\nDelete\nPost\nSearch\nRent\n", outputStreamCaptor.toString());
+        Assertions.assertEquals("Available Transactions:\nLogout\nCreate\nDelete\nPost\nSearch\nRent", outputStreamCaptor.toString().trim());
     }
 
     @AfterEach
