@@ -1,6 +1,6 @@
 package Test;
 
-import Phase_4.*;
+import Phase_4.User;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -25,7 +25,7 @@ public class UserTest {
     @Test
     public void getAATransactionTest() {
         System.setIn(new  ByteArrayInputStream("X".getBytes()));
-        User user = new User("Ting", "AA", "D:\\Third Year\\Software Quality Assurance\\Project\\OT_Bnb\\Phase_4\\Files\\available_tickets.txt", new Scanner(System.in));
+        User user = new User("Ting", "AA", "D:\\Schools Document\\Year_3\\CSCI_3060U_Software_Quality_Assurance\\OT_Bnb\\Phase_4\\Files\\available_tickets.txt", new Scanner(System.in));
         user.getTransactions();
         Assertions.assertEquals("Available Transactions:\nLogout\nCreate\nDelete\nPost\nSearch\nRent", outputStreamCaptor.toString().trim());
     }
@@ -33,7 +33,7 @@ public class UserTest {
     @Test
     public void getFSTransactionTest() {
         System.setIn(new  ByteArrayInputStream("X".getBytes()));
-        User user = new User("Ting", "FS", "D:\\Third Year\\Software Quality Assurance\\Project\\OT_Bnb\\Phase_4\\Files\\available_tickets.txt", new Scanner(System.in));
+        User user = new User("Ting", "FS", "D:\\Schools Document\\Year_3\\CSCI_3060U_Software_Quality_Assurance\\OT_Bnb\\Phase_4\\Files\\available_tickets.txt", new Scanner(System.in));
         user.getTransactions();
         Assertions.assertEquals("Available Transactions:\nLogout\nPost\nRent", outputStreamCaptor.toString().trim());
     }
@@ -41,7 +41,7 @@ public class UserTest {
     @Test
     public void getRSTransactionTest() {
         System.setIn(new  ByteArrayInputStream("X".getBytes()));
-        User user = new User("Ting", "RS", "D:\\Third Year\\Software Quality Assurance\\Project\\OT_Bnb\\Phase_4\\Files\\available_tickets.txt", new Scanner(System.in));
+        User user = new User("Ting", "RS", "D:\\Schools Document\\Year_3\\CSCI_3060U_Software_Quality_Assurance\\OT_Bnb\\Phase_4\\Files\\available_tickets.txt", new Scanner(System.in));
         user.getTransactions();
         Assertions.assertEquals("Logout\nRent", outputStreamCaptor.toString().trim());
     }
@@ -49,7 +49,7 @@ public class UserTest {
     @Test
     public void getPSTransactionTest() {
         System.setIn(new  ByteArrayInputStream("X".getBytes()));
-        User user = new User("Ting", "PS", "D:\\Third Year\\Software Quality Assurance\\Project\\OT_Bnb\\Phase_4\\Files\\available_tickets.txt", new Scanner(System.in));
+        User user = new User("Ting", "PS", "D:\\Schools Document\\Year_3\\CSCI_3060U_Software_Quality_Assurance\\OT_Bnb\\Phase_4\\Files\\available_tickets.txt", new Scanner(System.in));
         user.getTransactions();
         Assertions.assertEquals("Logout\nPost", outputStreamCaptor.toString().trim());
     }

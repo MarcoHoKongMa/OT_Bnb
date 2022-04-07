@@ -9,6 +9,8 @@ public class App {
     public static Singleton singleton = Singleton.getInstance();
     public static void main(String[] args){
 
+        boolean exit = false;
+
         // Check For Sufficient Arguments
         if (args.length != 3) {
             System.out.println("Usage: Phase_4.App <current_users_path> <available_tickets_path> <daily_transaction_path>");
@@ -26,7 +28,7 @@ public class App {
         }
 
         // Load in the current_users.txt file
-        readUserFile(args[0]);
+        exit = readUserFile(args[0], exit);
         testTickets(args[1]);
         testTransaction(args[2]);
         Scanner scanner = new Scanner(System.in);
@@ -34,7 +36,7 @@ public class App {
         String currentAccountStatus = "";
         boolean authorize = false;
         
-        while(authorize == false){
+        while(authorize == false && !exit){
             System.out.print("Enter Username: ");
             currentUsername = scanner.nextLine();
             if (singleton.usernames.contains(currentUsername)){
@@ -48,14 +50,15 @@ public class App {
             }
         }
 
-        System.out.println();
+        if (!exit) {
+            System.out.println();
+            System.out.print("Enter Transaction: ");
+        }
         User user = new User(currentUsername, currentAccountStatus, args[1], scanner);
         user.getTransactions();
-        System.out.print("Enter Transaction: ");
-        boolean exit = false;
         String userInput;
 
-        while(exit == false) {
+        while(!exit) {
             userInput = scanner.nextLine().toLowerCase();
 
             if (userInput.equals("create")){
@@ -86,7 +89,7 @@ public class App {
         scanner.close();
     } 
     
-    public static void readUserFile(String userPath) {
+    public static boolean readUserFile(String userPath, boolean exit) {
         int blankIndex = 0;
         try {
             File file = new File(userPath);
@@ -95,22 +98,24 @@ public class App {
                 String line = fscanner.nextLine();
                 if (line.length() != 13) {
                     System.out.println("App: Invalid Current Users File");
-                    System.exit(1);
-                }
-                for(int i=0; i<line.length(); i++){
-                    if (line.charAt(i) == ' '){
-                        blankIndex = i;
-                        i = line.length();
+                    exit = true;
+                } else {
+                    for(int i=0; i<line.length(); i++){
+                        if (line.charAt(i) == ' '){
+                            blankIndex = i;
+                            i = line.length();
+                        }
                     }
+                    singleton.usernames.add(line.substring(0, blankIndex));
+                    singleton.accountStatuses.add(line.substring(11, 13));
                 }
-                singleton.usernames.add(line.substring(0, blankIndex));
-                singleton.accountStatuses.add(line.substring(11, 13));
             }
             fscanner.close();
           } catch (IOException e) {
             System.out.println("App: Current Users File Not Found");
-            System.exit(1);
-          }
+            exit = true;
+        }
+        return exit;
     }
 
     private static void testTickets(String rentalFile) {
