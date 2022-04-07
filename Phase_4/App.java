@@ -90,7 +90,7 @@ public class App {
     } 
     
     public static boolean readUserFile(String userPath, boolean exit) {
-        int blankIndex = 0;
+        int blankIndex = 10;
         try {
             File file = new File(userPath);
             Scanner fscanner = new Scanner(file);

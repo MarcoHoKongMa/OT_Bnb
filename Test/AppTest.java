@@ -32,6 +32,12 @@ public class AppTest {
     }
 
     @Test
+    public void readUserFileNoSpaceTest() {
+        App.readUserFile("D:\\Schools Document\\Year_3\\CSCI_3060U_Software_Quality_Assurance\\OT_Bnb\\Test\\no_space_users.txt", false);
+        Assertions.assertEquals("Tinggggggg", App.singleton.usernames.get(0));
+    }
+
+    @Test
     public void readUserFileOneLoopTest() {
         App.readUserFile("D:\\Schools Document\\Year_3\\CSCI_3060U_Software_Quality_Assurance\\OT_Bnb\\Phase_4\\Files\\current_users.txt", false);
         Assertions.assertEquals(1, App.singleton.usernames.size());
