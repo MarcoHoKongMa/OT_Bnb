@@ -1,0 +1,11 @@
+01 Bob        AA                                     
+03 Ting       AA 00000000 Oshawa          1 100.00 00
+03 Ting       AA 00000001 Toronto         2 500.00 00
+03 Ting       AA 00000002 Markham         2 300.00 00
+00 Ting       AA                                     
+02 Bob        AA                                     
+04 Ting       AA 00000000 Oshawa          1 100.00 00
+04 Ting       AA 00000001 Toronto         2 500.00 00
+04 Ting       AA 00000002 Markham         2 300.00 00
+05 Ting       AA 00000000 Oshawa          1 100.00 03
+00 Ting       AA                                     
