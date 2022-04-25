@@ -12,8 +12,8 @@ public class App {
         boolean exit = false;
 
         // Check For Sufficient Arguments
-        if (args.length != 3) {
-            System.out.println("Usage: Phase_5.App <current_users_path> <available_tickets_path> <daily_transaction_path>");
+        if (args.length != 4) {
+            System.out.println("Usage: Phase_5.App <current_users_path> <available_tickets_path> <daily_transaction_path> <transaction_session_path>");
             System.exit(1);
         }
 
@@ -31,62 +31,66 @@ public class App {
         exit = readUserFile(args[0], exit);
         testTickets(args[1]);
         testTransaction(args[2]);
-        Scanner scanner = new Scanner(System.in);
-        String currentUsername = "";
-        String currentAccountStatus = "";
-        boolean authorize = false;
-        
-        while(authorize == false && !exit){
-            System.out.print("Enter Username: ");
-            currentUsername = scanner.nextLine();
-            if (singleton.usernames.contains(currentUsername)){
-                System.out.println("Login Successful");
-                authorize = true;
-                int index = singleton.usernames.indexOf(currentUsername);
-                currentAccountStatus = singleton.accountStatuses.get(index);
+        try {
+            Scanner scanner = new Scanner(new File(args[3]));
+            String currentUsername = "";
+            String currentAccountStatus = "";
+            boolean authorize = false;
+            
+            while(authorize == false && !exit){
+                System.out.print("Enter Username: ");
+                currentUsername = scanner.nextLine();
+                if (singleton.usernames.contains(currentUsername)){
+                    System.out.println("Login Successful");
+                    authorize = true;
+                    int index = singleton.usernames.indexOf(currentUsername);
+                    currentAccountStatus = singleton.accountStatuses.get(index);
 
-            }else{
-                System.out.println("Invalid user\n");
-            }
-        }
-
-        System.out.println();
-        User user = new User(currentUsername, currentAccountStatus, args[1], scanner);
-        user.getTransactions();
-        String userInput;
-        if (!exit) {
-            System.out.print("Enter Transaction: ");
-        }
-
-        while(!exit) {
-            userInput = scanner.nextLine().toLowerCase();
-
-            if (userInput.equals("create")){
-                user.create(args[0]);
-            }else if(userInput.equals("delete")){
-                user.delete(args[0]);
-            }
-            else if (userInput.equals("logout")){
-                user.logout(args[2]);
-                exit = true;
-                break;
-            }
-            else if (userInput.equals("post")) {
-                user.post();
-            }
-            else if (userInput.equals("search")) {
-                user.search();
-            }
-            else if (userInput.equals("rent")) {
-                user.rent();
+                }else{
+                    System.out.println("Invalid user\n");
+                }
             }
 
             System.out.println();
+            User user = new User(currentUsername, currentAccountStatus, args[1], scanner);
             user.getTransactions();
-            System.out.print("Enter Transaction: ");
-        }
+            String userInput;
+            if (!exit) {
+                System.out.print("Enter Transaction: ");
+            }
 
-        scanner.close();
+            while(!exit) {
+                userInput = scanner.nextLine().toLowerCase();
+
+                if (userInput.equals("create")){
+                    user.create(args[0]);
+                }else if(userInput.equals("delete")){
+                    user.delete(args[0]);
+                }
+                else if (userInput.equals("logout")){
+                    user.logout(args[2]);
+                    exit = true;
+                    break;
+                }
+                else if (userInput.equals("post")) {
+                    user.post();
+                }
+                else if (userInput.equals("search")) {
+                    user.search();
+                }
+                else if (userInput.equals("rent")) {
+                    user.rent();
+                }
+
+                System.out.println();
+                user.getTransactions();
+                System.out.print("Enter Transaction: ");
+            }
+
+            scanner.close();
+        } catch (IOException e) {
+            System.out.println("App: Transaction Session File Not Found");
+        }
     } 
     
     public static boolean readUserFile(String userPath, boolean exit) {

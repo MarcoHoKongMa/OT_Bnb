@@ -1,0 +1,3 @@
+04 Bob        AA 00000000 Oshawa          2 300.00 00
+04 Bob        AA 00000001 Oshawa          2 300.00 00
+00 Bob        AA                                     
