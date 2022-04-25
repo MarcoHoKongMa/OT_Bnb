@@ -83,6 +83,7 @@ public class Stub {
 
                 postings.add(account);
 
+                path = "Phase_5//Files//available_tickets.txt";
                 BufferedWriter writer = new BufferedWriter(new FileWriter(path, true));
                 if (new File(path).length() != 0){
                     writer.newLine();
@@ -95,6 +96,7 @@ public class Stub {
                 String account = "05 ";
                 account+=postings.poll().substring(3, 53);
 
+                path = "Phase_5//Files//available_tickets.txt";
                 BufferedWriter writer = new BufferedWriter(new FileWriter(path, true));
                 if (new File(path).length() != 0){
                     writer.newLine();

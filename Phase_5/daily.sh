@@ -15,4 +15,5 @@ for SESSION in Phase_5/Transaction_Sessions/*.txt; do
         echo $'\r' >> ""Phase_5/Transaction_Sessions/""$1""/merged_daily_transaction.txt""
     fi
 done
+java Phase_5.Stub Phase_5/Transaction_Sessions/Day_1_Sessions/merged_daily_transaction.txt      # Back End Stub (May Not Work)
 rm Phase_5/*.class
