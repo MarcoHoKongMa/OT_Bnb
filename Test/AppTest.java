@@ -1,7 +1,6 @@
 package Test;
 
 import Phase_4.App;
-
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import org.junit.jupiter.api.AfterEach;
